@@ -1,0 +1,40 @@
+# docker compose -f docker-compose.yml up --build -d
+services:
+  chatapp_db:
+    image: mysql:8.0
+    ports:
+      - '3306:3306'
+    environment:
+      - MYSQL_ROOT_PASSWORD=root_password_123
+      - MYSQL_DATABASE=chatapp
+      - MYSQL_USER=chatapp_user
+      - MYSQL_PASSWORD=chatapp_password_123
+      - MYSQL_TCP_PORT=3306
+    volumes:
+      - chatapp_db_data:/var/lib/mysql
+
+  redis:
+    image: redis:alpine
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+
+  chatapp_api:
+    depends_on:
+      - chatapp_db
+      - redis
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '8000:8000'
+    environment:
+      - PORT=8000
+      - NODE_ENV=development
+    volumes:
+      - ./src:/usr/src/app/src
+
+volumes:
+  chatapp_db_data:
+  redis_data:
