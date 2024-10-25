@@ -3,8 +3,6 @@ import { ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
 
-// import { ExpiredTokenFilter } from '@/shared/filters/expired-token.filter';
-
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -14,9 +12,8 @@ async function bootstrap() {
 
   app.use(cookieParser());
   app.setGlobalPrefix('api');
-  // app.useGlobalFilters(new ExpiredTokenFilter());
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
-  app.enableCors({ origin: ['http://localhost:5173'], credentials: true });
+  app.enableCors({ origin: ['http://localhost:3000'], credentials: true });
 
   await app.listen(port);
 }

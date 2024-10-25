@@ -22,10 +22,7 @@ export class User {
   password: string;
 
   @Column()
-  firstName: string;
-
-  @Column()
-  lastName: string;
+  username: string;
 
   @Column({ nullable: true })
   @Exclude()

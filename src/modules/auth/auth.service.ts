@@ -35,43 +35,55 @@ export class AuthService {
     });
 
     const { accessToken, refreshToken } = await this.generateTokens(user);
+    const userCookie = {
+      id: user.id,
+      email: user.email,
+      username: user.username,
+    };
+    res.cookie('user', JSON.stringify(userCookie), {
+      httpOnly: true,
+      secure: true,
+    });
     res.cookie('accessToken', accessToken, { httpOnly: true, secure: true });
     res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true });
     return {
-      user: {
-        id: user.id,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-      },
+      user,
     };
   }
 
   async login(user: User, res: Response): Promise<AuthResponse> {
     const { accessToken, refreshToken } = await this.generateTokens(user);
+    const userCookie = {
+      id: user.id,
+      email: user.email,
+      username: user.username,
+    };
+    res.cookie('user', JSON.stringify(userCookie), {
+      httpOnly: true,
+      secure: true,
+    });
     res.cookie('accessToken', accessToken, { httpOnly: true, secure: true });
     res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true });
     return {
-      user: {
-        id: user.id,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-      },
+      user,
     };
   }
 
   async refreshToken(user: User, res: Response): Promise<AuthResponse> {
     const { accessToken, refreshToken } = await this.generateTokens(user);
+    const userCookie = {
+      id: user.id,
+      email: user.email,
+      username: user.username,
+    };
+    res.cookie('user', JSON.stringify(userCookie), {
+      httpOnly: true,
+      secure: true,
+    });
     res.cookie('accessToken', accessToken, { httpOnly: true, secure: true });
     res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true });
     return {
-      user: {
-        id: user.id,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-      },
+      user,
     };
   }
 
@@ -79,6 +91,7 @@ export class AuthService {
     await this.userService.deleteRefreshToken(user.id);
     res.clearCookie('accessToken');
     res.clearCookie('refreshToken');
+    res.clearCookie('user');
   }
 
   async getUserIfRefreshTokenMatched(
