@@ -13,6 +13,9 @@ import { MessageModule } from './modules/message/message.module';
 import { ExpiredTokenFilter } from './shared/filters/expired-token.filter';
 import { ConversationModule } from './modules/conversation/conversation.module';
 import { JwtAccessTokenGuard } from './modules/auth/guards/jwt-access-token.guard';
+import { PostModule } from './post/post.module';
+import { CommentModule } from './comment/comment.module';
+import { LikeModule } from './like/like.module';
 
 @Module({
   imports: [
@@ -39,6 +42,9 @@ import { JwtAccessTokenGuard } from './modules/auth/guards/jwt-access-token.guar
     UserModule,
     ConversationModule,
     MessageModule,
+    PostModule,
+    CommentModule,
+    LikeModule,
   ],
   controllers: [],
   providers: [
