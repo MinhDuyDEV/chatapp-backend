@@ -25,6 +25,9 @@ export class User {
   username: string;
 
   @Column({ nullable: true })
+  avatar: string;
+
+  @Column({ nullable: true })
   @Exclude()
   refreshToken: string;
 

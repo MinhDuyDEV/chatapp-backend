@@ -9,4 +9,7 @@ export class UserResponse {
 
   @Expose()
   username: string;
+
+  @Expose()
+  avatar: string;
 }

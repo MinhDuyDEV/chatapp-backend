@@ -39,6 +39,7 @@ export class AuthService {
       id: user.id,
       email: user.email,
       username: user.username,
+      avatar: user.avatar,
     };
     res.cookie('user', JSON.stringify(userCookie), {
       httpOnly: true,
@@ -47,7 +48,7 @@ export class AuthService {
     res.cookie('accessToken', accessToken, { httpOnly: true, secure: true });
     res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true });
     return {
-      user,
+      user: userCookie,
     };
   }
 
@@ -57,6 +58,7 @@ export class AuthService {
       id: user.id,
       email: user.email,
       username: user.username,
+      avatar: user.avatar,
     };
     res.cookie('user', JSON.stringify(userCookie), {
       httpOnly: true,
@@ -65,7 +67,7 @@ export class AuthService {
     res.cookie('accessToken', accessToken, { httpOnly: true, secure: true });
     res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true });
     return {
-      user,
+      user: userCookie,
     };
   }
 
@@ -75,6 +77,7 @@ export class AuthService {
       id: user.id,
       email: user.email,
       username: user.username,
+      avatar: user.avatar,
     };
     res.cookie('user', JSON.stringify(userCookie), {
       httpOnly: true,
@@ -83,7 +86,7 @@ export class AuthService {
     res.cookie('accessToken', accessToken, { httpOnly: true, secure: true });
     res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true });
     return {
-      user,
+      user: userCookie,
     };
   }
 
