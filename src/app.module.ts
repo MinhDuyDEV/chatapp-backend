@@ -16,6 +16,9 @@ import { JwtAccessTokenGuard } from './modules/auth/guards/jwt-access-token.guar
 import { PostModule } from './post/post.module';
 import { CommentModule } from './comment/comment.module';
 import { LikeModule } from './like/like.module';
+import { LikeModule } from './modules/like/like.module';
+import { PostModule } from './modules/post/post.module';
+import { CommentModule } from './modules/comment/comment.module';
 
 @Module({
   imports: [
