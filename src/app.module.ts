@@ -9,16 +9,13 @@ import { AuthModule } from '@/modules/auth/auth.module';
 import { DatabaseType } from '@/shared/constants/db.type';
 
 import entities from './entities';
+import { PostModule } from './modules/post/post.module';
+import { LikeModule } from './modules/like/like.module';
 import { MessageModule } from './modules/message/message.module';
+import { CommentModule } from './modules/comment/comment.module';
 import { ExpiredTokenFilter } from './shared/filters/expired-token.filter';
 import { ConversationModule } from './modules/conversation/conversation.module';
 import { JwtAccessTokenGuard } from './modules/auth/guards/jwt-access-token.guard';
-import { PostModule } from './post/post.module';
-import { CommentModule } from './comment/comment.module';
-import { LikeModule } from './like/like.module';
-import { LikeModule } from './modules/like/like.module';
-import { PostModule } from './modules/post/post.module';
-import { CommentModule } from './modules/comment/comment.module';
 
 @Module({
   imports: [

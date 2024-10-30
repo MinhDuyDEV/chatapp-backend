@@ -6,6 +6,7 @@ import { Conversation } from '@/entities/conversation.entity';
 import { UserResponse } from '@/modules/user/dto/user-response.dto';
 import { MessageResponse } from '@/modules/message/dto/message-response.dto';
 import { ConversationResponse } from '@/modules/conversation/dto/conversation-response.dto';
+import { LastMessageSentResponse } from '@/modules/message/dto/last-message-sent-response.dto';
 
 export function transformConversationResponse(
   conversation: Conversation,
@@ -15,7 +16,13 @@ export function transformConversationResponse(
     {
       id: conversation.id,
       createdAt: conversation.createdAt,
-      lastMessageSent: conversation.lastMessageSent,
+      lastMessageSent: plainToInstance(
+        LastMessageSentResponse,
+        conversation.lastMessageSent,
+        {
+          excludeExtraneousValues: true,
+        },
+      ),
       creator: plainToInstance(UserResponse, conversation.creator, {
         excludeExtraneousValues: true,
       }),

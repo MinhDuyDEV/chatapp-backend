@@ -18,9 +18,11 @@ export class ConversationController {
     @AuthUser() user: User,
     @Body() createConversationDto: CreateConversationDto,
   ): Promise<ConversationResponse> {
-    return await this.conversationService.createConversation(
-      user,
-      createConversationDto,
+    return transformConversationResponse(
+      await this.conversationService.createConversation(
+        user,
+        createConversationDto,
+      ),
     );
   }
 

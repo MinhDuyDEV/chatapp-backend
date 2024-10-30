@@ -1,6 +1,8 @@
 import {
   ConflictException,
   ForbiddenException,
+  forwardRef,
+  Inject,
   Injectable,
 } from '@nestjs/common';
 import { Repository } from 'typeorm';
@@ -16,6 +18,7 @@ export class MessageService {
   constructor(
     @InjectRepository(Message)
     private readonly messageRepository: Repository<Message>,
+    @Inject(forwardRef(() => ConversationService))
     private readonly conversationService: ConversationService,
   ) {}
 
