@@ -1,10 +1,7 @@
 import { Exclude } from 'class-transformer';
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 
-import { Post } from './post.entity';
-import { Like } from './like.entity';
 import { Message } from './message.entity';
-import { Comment } from './comment.entity';
 
 @Entity('users')
 export class User {
@@ -30,13 +27,4 @@ export class User {
 
   @OneToMany(() => Message, (message) => message.author)
   messages: Message[];
-
-  @OneToMany(() => Post, (post) => post.author)
-  posts: Post[];
-
-  @OneToMany(() => Comment, (comment) => comment.author)
-  comments: Comment[];
-
-  @OneToMany(() => Like, (like) => like.user)
-  likes: Like[];
 }
