@@ -63,7 +63,7 @@ export class MessageService {
     return await this.messageRepository.find({
       relations: ['author'],
       where: { conversation: { id } },
-      order: { createdAt: 'DESC' },
+      order: { createdAt: 'ASC' },
     });
   }
 }
