@@ -5,6 +5,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 
 import {
   access_token_private_key,
+  access_token_public_key,
   refresh_token_private_key,
 } from 'src/private/jwt.constraint';
 import { User } from '@/entities/user.entity';
@@ -144,6 +145,13 @@ export class AuthService {
       accessToken,
       refreshToken,
     };
+  }
+
+  async verifyAccessToken(token: string): Promise<TokenPayload> {
+    return await this.jwtService.verify(token, {
+      algorithms: ['RS256'],
+      publicKey: access_token_public_key,
+    });
   }
 
   generateAccessToken(payload: TokenPayload) {

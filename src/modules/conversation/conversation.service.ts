@@ -83,12 +83,12 @@ export class ConversationService {
 
     const conversationSaved =
       await this.conversationRepository.save(conversation);
-    const lastMessageSent = await this.messageService.createMessage({
-      content: message,
-      conversationId: conversationSaved.id,
-      user,
-    });
-    conversationSaved.lastMessageSent = lastMessageSent;
+    // const lastMessageSent = await this.messageService.createMessage({
+    //   content: message,
+    //   conversationId: conversationSaved.id,
+    //   user,
+    // });
+    // conversationSaved.lastMessageSent = lastMessageSent;
 
     return this.conversationRepository.save(conversationSaved);
   }

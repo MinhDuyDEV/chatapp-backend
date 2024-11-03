@@ -4,7 +4,10 @@ import { User } from '@/entities/user.entity';
 import { Message } from '@/entities/message.entity';
 import { Conversation } from '@/entities/conversation.entity';
 import { UserResponse } from '@/modules/user/dto/user-response.dto';
-import { MessageResponse } from '@/modules/message/dto/message-response.dto';
+import {
+  CreateMessageResponse,
+  MessageResponse,
+} from '@/modules/message/dto/message-response.dto';
 import { ConversationResponse } from '@/modules/conversation/dto/conversation-response.dto';
 import { LastMessageSentResponse } from '@/modules/message/dto/last-message-sent-response.dto';
 
@@ -35,16 +38,15 @@ export function transformConversationResponse(
 }
 
 export function transformCreateMessageResponse(
-  message: Message,
-): MessageResponse {
+  data: CreateMessageResponse,
+): CreateMessageResponse {
   return plainToInstance(
-    MessageResponse,
+    CreateMessageResponse,
     {
-      id: message.id,
-      content: message.content,
-      createdAt: message.createdAt,
-      author: transformUserResponse(message.author),
-      conversation: transformConversationResponse(message.conversation),
+      message: plainToInstance(MessageResponse, data.message, {
+        excludeExtraneousValues: true,
+      }),
+      conversation: transformConversationResponse(data.conversation),
     },
     { excludeExtraneousValues: true },
   );

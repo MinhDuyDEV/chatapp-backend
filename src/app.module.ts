@@ -13,6 +13,8 @@ import { MessageModule } from './modules/message/message.module';
 import { ExpiredTokenFilter } from './shared/filters/expired-token.filter';
 import { ConversationModule } from './modules/conversation/conversation.module';
 import { JwtAccessTokenGuard } from './modules/auth/guards/jwt-access-token.guard';
+import { EventsModule } from './modules/events/events.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
@@ -35,10 +37,12 @@ import { JwtAccessTokenGuard } from './modules/auth/guards/jwt-access-token.guar
         synchronize: true,
       }),
     }),
+    EventEmitterModule.forRoot(),
     AuthModule,
     UserModule,
     ConversationModule,
     MessageModule,
+    EventsModule,
   ],
   controllers: [],
   providers: [
