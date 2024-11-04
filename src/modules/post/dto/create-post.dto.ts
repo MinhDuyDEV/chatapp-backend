@@ -1,4 +1,4 @@
-import { Visibility } from '@/shared/constants/post.enum';
+import { Visibility } from '@/shared/constants/visibility.enum';
 import { IsNotEmpty } from 'class-validator';
 
 export class CreatePostDto {

@@ -2,10 +2,10 @@ import { User } from './user.entity';
 import { Message } from './message.entity';
 import { Conversation } from './conversation.entity';
 import { Post } from './post.entity';
-import { Media } from './media.entity';
+import { File } from './file.entity';
 
-const entities = [User, Conversation, Message, Post, Media];
+const entities = [User, Conversation, Message, Post, File];
 
-export { User, Conversation, Message, Post, Media };
+export { User, Conversation, Message, Post, File };
 
 export default entities;

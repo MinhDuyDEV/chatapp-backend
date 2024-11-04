@@ -16,6 +16,7 @@ import { JwtAccessTokenGuard } from './modules/auth/guards/jwt-access-token.guar
 import { EventsModule } from './modules/events/events.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { PostModule } from './modules/post/post.module';
+import { FileModule } from './modules/file/file.module';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { PostModule } from './modules/post/post.module';
     MessageModule,
     EventsModule,
     PostModule,
+    FileModule,
   ],
   controllers: [],
   providers: [

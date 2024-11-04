@@ -1,25 +1,13 @@
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  ManyToOne,
-  OneToMany,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
 import { User } from './user.entity';
-import { Visibility } from '@/shared/constants/post.enum';
-import { Media } from './media.entity';
+import { Visibility } from '@/shared/constants/visibility.enum';
+import { File } from './file.entity';
+import { BaseEntity } from './base.entity';
 
 @Entity('posts')
-export class Post {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
+export class Post extends BaseEntity {
   @Column()
   content: string;
-
-  @CreateDateColumn()
-  createdAt: Date;
 
   @ManyToOne(() => User, (user) => user.posts)
   author: User;
@@ -31,6 +19,6 @@ export class Post {
   })
   visibility: Visibility;
 
-  @OneToMany(() => Media, (media) => media.post)
-  media: Media[];
+  @OneToMany(() => File, (file) => file.post)
+  file: File[];
 }

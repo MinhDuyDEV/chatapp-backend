@@ -15,7 +15,6 @@ import { JwtAccessTokenGuard } from '../auth/guards/jwt-access-token.guard';
 import { ROUTES } from '@/shared/constants/routes.enum';
 import { AuthUser } from '@/shared/decorators/auth-user.decorator';
 import { User } from '@/entities/user.entity';
-import { transformPostResponse } from '@/shared/utils/format';
 
 @Controller(ROUTES.POSTS)
 export class PostController {
@@ -29,7 +28,7 @@ export class PostController {
 
   @Get()
   async findAll() {
-    return (await this.postService.findAll()).map(transformPostResponse);
+    return this.postService.findAll();
   }
 
   @Get(':id')
