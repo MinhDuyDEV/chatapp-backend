@@ -15,21 +15,27 @@ import { AuthUser } from '@/shared/decorators/auth-user.decorator';
 import { ConversationService } from './conversation.service';
 import { CreateConversationDto } from './dto/create-conversation.dto';
 import { Conversation } from '@/entities/conversation.entity';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller(ROUTES.CONVERSATIONS)
 export class ConversationController {
-  constructor(private readonly conversationService: ConversationService) {}
+  constructor(
+    private readonly conversationService: ConversationService,
+    private readonly eventEmitter: EventEmitter2,
+  ) {}
 
   @Post()
   async createConversation(
     @AuthUser() user: User,
     @Body() createConversationDto: CreateConversationDto,
   ): Promise<Conversation> {
-    return await this.conversationService.createConversation(
+    const response = await this.conversationService.createConversation(
       user,
       createConversationDto,
     );
+    this.eventEmitter.emit('conversation.create', response);
+    return response;
   }
 
   @Get()

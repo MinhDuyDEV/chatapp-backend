@@ -6,7 +6,7 @@ import {
   OnGatewayDisconnect,
   OnGatewayConnection,
 } from '@nestjs/websockets';
-import { Server, Socket } from 'socket.io';
+import { Server } from 'socket.io';
 import { ServerToClientEvents } from '@/modules/events/types/events';
 import { Logger, Inject } from '@nestjs/common';
 import { SocketAuthMiddleware } from '@/modules/auth/ws.mw';
@@ -15,6 +15,7 @@ import { AuthenticatedSocket } from '@/modules/events/types';
 import { GatewaySessionManager } from '@/modules/events/gateway-session-manager';
 import { OnEvent } from '@nestjs/event-emitter';
 import { CreateMessageResponse } from '@/modules/message/dto/message-response.dto';
+import { Conversation } from '@/entities/conversation.entity';
 
 @WebSocketGateway({
   cors: {
@@ -54,7 +55,9 @@ export class EventsGateway
   @OnEvent('message.create')
   handleMessageCreateEvent(payload: CreateMessageResponse) {
     const usersInSocket = this.sessions.getSockets();
-    Logger.log('message.create event', JSON.stringify(usersInSocket));
+    const userIds = Array.from(usersInSocket.keys());
+    Logger.log('message.create event', JSON.stringify(userIds));
+
     const { message, conversation } = payload;
 
     const authorSocket = this.sessions.getUserSocket(message.author.id);
@@ -65,5 +68,15 @@ export class EventsGateway
 
     if (authorSocket) authorSocket.emit('onMessage', payload);
     if (recipientSocket) recipientSocket.emit('onMessage', payload);
+  }
+
+  @OnEvent('conversation.create')
+  handleConversationCreateEvent(payload: Conversation) {
+    console.log('conversation.create');
+    const creatorSocket = this.sessions.getUserSocket(payload.creator.id);
+    const recipientSocket = this.sessions.getUserSocket(payload.recipient.id);
+
+    if (creatorSocket) creatorSocket.emit('onConversation', payload);
+    if (recipientSocket) recipientSocket.emit('onConversation', payload);
   }
 }

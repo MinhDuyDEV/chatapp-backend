@@ -33,7 +33,6 @@ export class MessageController {
       user,
       ...createMessageDto,
     });
-    console.log('response', response);
     this.eventEmitter.emit('message.create', response);
     return;
   }
