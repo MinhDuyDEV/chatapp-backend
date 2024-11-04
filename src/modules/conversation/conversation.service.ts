@@ -32,7 +32,7 @@ export class ConversationService {
       .leftJoinAndSelect('conversation.lastMessageSent', 'lastMessageSent')
       .where('creator.id = :id', { id })
       .orWhere('recipient.id = :id', { id })
-      .orderBy('conversation.id', 'DESC')
+      .orderBy('lastMessageSent.createdAt', 'DESC')
       .getMany();
   }
 
@@ -83,12 +83,12 @@ export class ConversationService {
 
     const conversationSaved =
       await this.conversationRepository.save(conversation);
-    // const lastMessageSent = await this.messageService.createMessage({
-    //   content: message,
-    //   conversationId: conversationSaved.id,
-    //   user,
-    // });
-    // conversationSaved.lastMessageSent = lastMessageSent;
+    conversationSaved.lastMessageSent =
+      await this.messageService.createLastMessage(
+        conversationSaved.id,
+        message,
+        user,
+      );
 
     return this.conversationRepository.save(conversationSaved);
   }
@@ -99,6 +99,7 @@ export class ConversationService {
   ): Promise<Conversation> {
     const conversation = await this.conversationRepository.findOne({
       where: { id: conversationId },
+      relations: ['creator', 'recipient', 'lastMessageSent'],
     });
     if (!conversation) {
       throw new Error('Conversation not found');

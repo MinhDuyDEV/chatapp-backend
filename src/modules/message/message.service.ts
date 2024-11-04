@@ -13,6 +13,7 @@ import { ConversationService } from '@/modules/conversation/conversation.service
 
 import { CreateMessageParams } from './types/create-message-params.type';
 import { CreateMessageResponse } from '@/modules/message/dto/message-response.dto';
+import { User } from '@/entities/user.entity';
 
 @Injectable()
 export class MessageService {
@@ -27,7 +28,7 @@ export class MessageService {
     content,
     conversationId,
     user,
-  }: CreateMessageParams): Promise<CreateMessageResponse> {
+  }: CreateMessageParams): Promise<any> {
     const existedConversation =
       await this.conversationService.findConversationById(conversationId);
     if (!existedConversation)
@@ -49,6 +50,24 @@ export class MessageService {
         savedMessage,
       );
     return { message: savedMessage, conversation: savedConversation };
+  }
+
+  async createLastMessage(
+    conversationId: string,
+    message: string,
+    user: User,
+  ): Promise<any> {
+    const lastMessage = this.messageRepository.create({
+      content: message,
+      conversation: { id: conversationId },
+      author: user,
+    });
+    const savedLastMessage = await this.messageRepository.save(lastMessage);
+    return {
+      id: savedLastMessage.id,
+      content: savedLastMessage.content,
+      createdAt: savedLastMessage.createdAt,
+    };
   }
 
   async getMessages(user, conversationId: string): Promise<Message[]> {
