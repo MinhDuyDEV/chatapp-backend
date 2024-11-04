@@ -32,7 +32,7 @@ export class ConversationService {
       .leftJoinAndSelect('conversation.lastMessageSent', 'lastMessageSent')
       .where('creator.id = :id', { id })
       .orWhere('recipient.id = :id', { id })
-      .orderBy('conversation.id', 'DESC')
+      .orderBy('lastMessageSent.createdAt', 'DESC')
       .getMany();
   }
 
@@ -99,6 +99,7 @@ export class ConversationService {
   ): Promise<Conversation> {
     const conversation = await this.conversationRepository.findOne({
       where: { id: conversationId },
+      relations: ['creator', 'recipient', 'lastMessageSent'],
     });
     if (!conversation) {
       throw new Error('Conversation not found');

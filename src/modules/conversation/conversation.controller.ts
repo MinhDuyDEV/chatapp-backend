@@ -1,14 +1,22 @@
-import { Controller, Post, Body, Get, Param } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Param,
+  UseInterceptors,
+  ClassSerializerInterceptor,
+} from '@nestjs/common';
 
 import { User } from '@/entities/user.entity';
 import { ROUTES } from '@/shared/constants/routes.enum';
 import { AuthUser } from '@/shared/decorators/auth-user.decorator';
-import { transformConversationResponse } from '@/shared/utils/format';
 
 import { ConversationService } from './conversation.service';
 import { CreateConversationDto } from './dto/create-conversation.dto';
-import { ConversationResponse } from './dto/conversation-response.dto';
+import { Conversation } from '@/entities/conversation.entity';
 
+@UseInterceptors(ClassSerializerInterceptor)
 @Controller(ROUTES.CONVERSATIONS)
 export class ConversationController {
   constructor(private readonly conversationService: ConversationService) {}
@@ -17,30 +25,20 @@ export class ConversationController {
   async createConversation(
     @AuthUser() user: User,
     @Body() createConversationDto: CreateConversationDto,
-  ): Promise<ConversationResponse> {
-    return transformConversationResponse(
-      await this.conversationService.createConversation(
-        user,
-        createConversationDto,
-      ),
+  ): Promise<Conversation> {
+    return await this.conversationService.createConversation(
+      user,
+      createConversationDto,
     );
   }
 
   @Get()
-  async getConversations(
-    @AuthUser() user: User,
-  ): Promise<ConversationResponse[]> {
-    return (await this.conversationService.getConversations(user.id)).map(
-      transformConversationResponse,
-    );
+  async getConversations(@AuthUser() user: User): Promise<Conversation[]> {
+    return await this.conversationService.getConversations(user.id);
   }
 
   @Get(':id')
-  async getConversation(
-    @Param('id') id: string,
-  ): Promise<ConversationResponse> {
-    return transformConversationResponse(
-      await this.conversationService.findConversationById(id),
-    );
+  async getConversation(@Param('id') id: string): Promise<Conversation> {
+    return await this.conversationService.findConversationById(id);
   }
 }

@@ -27,7 +27,7 @@ export class MessageService {
     content,
     conversationId,
     user,
-  }: CreateMessageParams): Promise<CreateMessageResponse> {
+  }: CreateMessageParams): Promise<any> {
     const existedConversation =
       await this.conversationService.findConversationById(conversationId);
     if (!existedConversation)
