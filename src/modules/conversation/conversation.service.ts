@@ -14,6 +14,7 @@ import { Conversation } from '@/entities/conversation.entity';
 import { MessageService } from '@/modules/message/message.service';
 
 import { CreateConversationParams } from './types/create-conversation-params';
+import { UpdateConversationParams } from '@/modules/conversation/types/update-conversation-params';
 
 @Injectable()
 export class ConversationService {
@@ -56,24 +57,17 @@ export class ConversationService {
         'You cannot create a conversation with yourself',
       );
 
-    const { id: recipientId } = await this.userService.findUser({ email });
-    if (!recipientId) throw new BadRequestException('Recipient not found');
+    const existedRecipient = await this.userService.findUser({ email });
+    if (!existedRecipient) throw new BadRequestException('Recipient not found');
 
     const existedConversation = await this.conversationRepository.findOne({
       where: [
-        { creator: { id: user.id }, recipient: { id: recipientId } },
-        { creator: { id: recipientId }, recipient: { id: user.id } },
+        { creator: { id: user.id }, recipient: { id: existedRecipient.id } },
+        { creator: { id: existedRecipient.id }, recipient: { id: user.id } },
       ],
     });
     if (existedConversation) {
       throw new ConflictException('Conversation already exists');
-    }
-
-    const existedRecipient = await this.userService.findUser({
-      id: recipientId,
-    });
-    if (!existedRecipient) {
-      throw new BadRequestException('Recipient not found');
     }
 
     const conversation = this.conversationRepository.create({
@@ -107,5 +101,9 @@ export class ConversationService {
 
     conversation.lastMessageSent = message;
     return this.conversationRepository.save(conversation);
+  }
+
+  update({ id, lastMessageSent }: UpdateConversationParams) {
+    return this.conversationRepository.update(id, { lastMessageSent });
   }
 }
