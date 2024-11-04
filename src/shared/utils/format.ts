@@ -10,6 +10,24 @@ import {
 } from '@/modules/message/dto/message-response.dto';
 import { ConversationResponse } from '@/modules/conversation/dto/conversation-response.dto';
 import { LastMessageSentResponse } from '@/modules/message/dto/last-message-sent-response.dto';
+import { PostResponse } from '@/modules/post/dto/post-response.dto';
+import { Post } from '@/entities/post.entity';
+
+export function transformPostResponse(post: Post): PostResponse {
+  return plainToInstance(
+    PostResponse,
+    {
+      id: post.id,
+      content: post.content,
+      visibility: post.visibility,
+      createdAt: post.createdAt,
+      author: plainToInstance(UserResponse, post.author, {
+        excludeExtraneousValues: true,
+      }),
+    },
+    { excludeExtraneousValues: true },
+  );
+}
 
 export function transformConversationResponse(
   conversation: Conversation,

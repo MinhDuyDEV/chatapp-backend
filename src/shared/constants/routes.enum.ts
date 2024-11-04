@@ -3,4 +3,5 @@ export enum ROUTES {
   USERS = 'users',
   CONVERSATIONS = 'conversations',
   MESSAGES = 'messages',
+  POSTS = 'posts',
 }
