@@ -79,4 +79,20 @@ export class EventsGateway
     if (creatorSocket) creatorSocket.emit('onConversation', payload);
     if (recipientSocket) recipientSocket.emit('onConversation', payload);
   }
+
+  // @OnEvent('message.delete')
+  // async handleMessageDelete(payload) {
+  //   console.log('Inside message.delete');
+  //   console.log(payload);
+  //   const conversation = await this.conversationService.findById(
+  //     payload.conversationId,
+  //   );
+  //   if (!conversation) return;
+  //   const { creator, recipient } = conversation;
+  //   const recipientSocket =
+  //     creator.id === payload.userId
+  //       ? this.sessions.getUserSocket(recipient.id)
+  //       : this.sessions.getUserSocket(creator.id);
+  //   if (recipientSocket) recipientSocket.emit('onMessageDelete', payload);
+  // }
 }

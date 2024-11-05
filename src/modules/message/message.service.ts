@@ -12,8 +12,10 @@ import { Message } from '@/entities/message.entity';
 import { ConversationService } from '@/modules/conversation/conversation.service';
 
 import { CreateMessageParams } from './types/create-message-params.type';
-import { CreateMessageResponse } from '@/modules/message/dto/message-response.dto';
 import { User } from '@/entities/user.entity';
+import { DeleteMessageParam } from '@/modules/message/types/delete-message-param.type';
+import { Conversation } from '@/entities/conversation.entity';
+import { EditMessageParams } from '@/modules/message/types/edit-message-params.type';
 
 @Injectable()
 export class MessageService {
@@ -85,5 +87,68 @@ export class MessageService {
       where: { conversation: { id } },
       order: { createdAt: 'ASC' },
     });
+  }
+
+  async deleteMessage(param: DeleteMessageParam) {
+    const { user, conversationId, messageId } = param;
+    const existedConversation =
+      await this.conversationService.findConversationById(conversationId);
+    if (!existedConversation)
+      throw new ConflictException('Conversation not found');
+
+    const { creator, recipient } = existedConversation;
+    if (creator.id !== user.id && recipient.id !== user.id)
+      throw new ForbiddenException('Cannot Delete Message');
+
+    const message = await this.messageRepository.findOne({
+      where: { id: messageId, conversation: { id: conversationId } },
+    });
+    if (!message) throw new ConflictException('Message not found');
+    if (existedConversation.lastMessageSent.id !== message.id)
+      return this.messageRepository.delete({ id: message.id });
+
+    return this.deleteLastMessage(existedConversation, message);
+  }
+
+  async deleteLastMessage(conversation: Conversation, message: Message) {
+    const size = conversation.messages.length;
+    const SECOND_MESSAGE_INDEX = 1;
+    if (size <= SECOND_MESSAGE_INDEX) {
+      await this.conversationService.update({
+        id: conversation.id,
+        lastMessageSent: null,
+      });
+
+      return this.messageRepository.delete({ id: message.id });
+    } else {
+      const newLastMessage = conversation.messages[SECOND_MESSAGE_INDEX];
+      await this.conversationService.update({
+        id: conversation.id,
+        lastMessageSent: newLastMessage,
+      });
+
+      return this.messageRepository.delete({ id: message.id });
+    }
+  }
+
+  async editMessage(params: EditMessageParams): Promise<Message> {
+    const { userId, conversationId, messageId, content } = params;
+    const message = await this.messageRepository.findOne({
+      where: {
+        id: messageId,
+        conversation: { id: conversationId },
+        author: { id: userId },
+      },
+      relations: [
+        'conversation',
+        'conversation.creator',
+        'conversation.recipient',
+        'author',
+      ],
+    });
+    if (!message) throw new ConflictException('Message not found');
+
+    message.content = content;
+    return this.messageRepository.save(message);
   }
 }
