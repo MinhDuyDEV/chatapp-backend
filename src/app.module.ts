@@ -15,6 +15,8 @@ import { ConversationModule } from './modules/conversation/conversation.module';
 import { JwtAccessTokenGuard } from './modules/auth/guards/jwt-access-token.guard';
 import { EventsModule } from './modules/events/events.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { PostModule } from './modules/post/post.module';
+import { FileModule } from './modules/file/file.module';
 
 @Module({
   imports: [
@@ -43,6 +45,8 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     ConversationModule,
     MessageModule,
     EventsModule,
+    PostModule,
+    FileModule,
   ],
   controllers: [],
   providers: [

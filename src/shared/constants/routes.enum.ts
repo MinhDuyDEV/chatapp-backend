@@ -3,4 +3,5 @@ export enum ROUTES {
   USERS = 'users',
   CONVERSATIONS = 'conversations',
   MESSAGES = 'conversations/:conversationId/messages',
+  POSTS = 'posts',
 }
