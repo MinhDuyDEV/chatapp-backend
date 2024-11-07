@@ -38,13 +38,10 @@ export class ConversationService {
   }
 
   async findConversationById(id: string): Promise<Conversation> {
-    const conversation = await this.conversationRepository.findOne({
+    return await this.conversationRepository.findOne({
       where: { id },
       relations: ['creator', 'recipient', 'lastMessageSent'],
     });
-    if (!conversation) throw new NotFoundException('Conversation not found');
-
-    return conversation;
   }
 
   async createConversation(

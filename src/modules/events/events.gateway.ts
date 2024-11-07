@@ -5,6 +5,8 @@ import {
   OnGatewayInit,
   OnGatewayDisconnect,
   OnGatewayConnection,
+  MessageBody,
+  ConnectedSocket,
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 import { ServerToClientEvents } from '@/modules/events/types/events';
@@ -16,6 +18,8 @@ import { GatewaySessionManager } from '@/modules/events/gateway-session-manager'
 import { OnEvent } from '@nestjs/event-emitter';
 import { CreateMessageResponse } from '@/modules/message/dto/message-response.dto';
 import { Conversation } from '@/entities/conversation.entity';
+import { ConversationService } from '@/modules/conversation/conversation.service';
+import { Message } from '@/entities/message.entity';
 
 @WebSocketGateway({
   cors: {
@@ -31,6 +35,7 @@ export class EventsGateway
   constructor(
     @Inject(AuthService) private readonly authService: AuthService,
     private readonly sessions: GatewaySessionManager,
+    private readonly conversationService: ConversationService,
   ) {}
 
   @WebSocketServer()
@@ -52,6 +57,52 @@ export class EventsGateway
     this.sessions.removeUserSocket(socket.user.id);
   }
 
+  @SubscribeMessage('onConversationJoin')
+  onConversationJoin(
+    @MessageBody() data: any,
+    @ConnectedSocket() client: AuthenticatedSocket,
+  ) {
+    Logger.log(
+      `${client.user?.id} joined a Conversation of ID: ${data.conversationId}`,
+    );
+    client.join(`conversation-${data.conversationId}`);
+    Logger.log(JSON.stringify(client.rooms));
+    client.to(`conversation-${data.conversationId}`).emit('userJoin');
+  }
+
+  @SubscribeMessage('onConversationLeave')
+  onConversationLeave(
+    @MessageBody() data: any,
+    @ConnectedSocket() client: AuthenticatedSocket,
+  ) {
+    Logger.log('onConversationLeave');
+    client.leave(`conversation-${data.conversationId}`);
+    Logger.log(JSON.stringify(client.rooms));
+    client.to(`conversation-${data.conversationId}`).emit('userLeave');
+  }
+
+  @SubscribeMessage('onTypingStart')
+  onTypingStart(
+    @MessageBody() data: any,
+    @ConnectedSocket() client: AuthenticatedSocket,
+  ) {
+    Logger.log('onTypingStart');
+    Logger.log(data.conversationId);
+    Logger.log(JSON.stringify(client.rooms));
+    client.to(`conversation-${data.conversationId}`).emit('onTypingStart');
+  }
+
+  @SubscribeMessage('onTypingStop')
+  onTypingStop(
+    @MessageBody() data: any,
+    @ConnectedSocket() client: AuthenticatedSocket,
+  ) {
+    Logger.log('onTypingStop');
+    Logger.log(data.conversationId);
+    Logger.log(JSON.stringify(client.rooms));
+    client.to(`conversation-${data.conversationId}`).emit('onTypingStop');
+  }
+
   @OnEvent('message.create')
   handleMessageCreateEvent(payload: CreateMessageResponse) {
     const usersInSocket = this.sessions.getSockets();
@@ -70,6 +121,39 @@ export class EventsGateway
     if (recipientSocket) recipientSocket.emit('onMessage', payload);
   }
 
+  @OnEvent('message.update')
+  async handleMessageUpdate(message: Message) {
+    const {
+      author,
+      conversation: { creator, recipient },
+    } = message;
+    console.log(message);
+    const recipientSocket =
+      author.id === creator.id
+        ? this.sessions.getUserSocket(recipient.id)
+        : this.sessions.getUserSocket(creator.id);
+    if (recipientSocket) recipientSocket.emit('onMessageUpdate', message);
+  }
+
+  @OnEvent('message.delete')
+  async handleMessageDelete(payload: {
+    userId: string;
+    messageId: string;
+    conversationId: string;
+  }) {
+    console.log('message.delete');
+    const conversation = await this.conversationService.findConversationById(
+      payload.conversationId,
+    );
+    if (!conversation) return;
+    const { creator, recipient } = conversation;
+    const recipientSocket =
+      creator.id === payload.userId
+        ? this.sessions.getUserSocket(recipient.id)
+        : this.sessions.getUserSocket(creator.id);
+    if (recipientSocket) recipientSocket.emit('onMessageDelete', payload);
+  }
+
   @OnEvent('conversation.create')
   handleConversationCreateEvent(payload: Conversation) {
     console.log('conversation.create');
@@ -79,20 +163,4 @@ export class EventsGateway
     if (creatorSocket) creatorSocket.emit('onConversation', payload);
     if (recipientSocket) recipientSocket.emit('onConversation', payload);
   }
-
-  // @OnEvent('message.delete')
-  // async handleMessageDelete(payload) {
-  //   console.log('Inside message.delete');
-  //   console.log(payload);
-  //   const conversation = await this.conversationService.findById(
-  //     payload.conversationId,
-  //   );
-  //   if (!conversation) return;
-  //   const { creator, recipient } = conversation;
-  //   const recipientSocket =
-  //     creator.id === payload.userId
-  //       ? this.sessions.getUserSocket(recipient.id)
-  //       : this.sessions.getUserSocket(creator.id);
-  //   if (recipientSocket) recipientSocket.emit('onMessageDelete', payload);
-  // }
 }

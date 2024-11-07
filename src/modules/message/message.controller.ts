@@ -56,7 +56,7 @@ export class MessageController {
   @Patch(':messageId')
   async editMessage(
     @AuthUser() { id: userId }: User,
-    @Param('id') conversationId: string,
+    @Param('conversationId') conversationId: string,
     @Param('messageId') messageId: string,
     @Body() { content }: EditMessageDto,
   ) {
@@ -66,16 +66,16 @@ export class MessageController {
     return message;
   }
 
-  @Delete(':conversationId')
+  @Delete(':messageId')
   async deleteMessage(
     @AuthUser() user: User,
     @Param('conversationId') conversationId: string,
     @Param('messageId') messageId: string,
   ): Promise<any> {
-    return await this.messageService.deleteMessage({
-      user,
-      conversationId,
-      messageId,
-    });
+    console.log('deleteMessage controller', conversationId, messageId);
+    const params = { userId: user.id, conversationId, messageId };
+    await this.messageService.deleteMessage(params);
+    this.eventEmitter.emit('message.delete', params);
+    return { conversationId, messageId };
   }
 }

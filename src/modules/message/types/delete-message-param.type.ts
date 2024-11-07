@@ -1,7 +1,5 @@
-import { User } from '@/entities/user.entity';
-
 export type DeleteMessageParam = {
-  user: User;
+  userId: string;
   messageId: string;
   conversationId: string;
 };
