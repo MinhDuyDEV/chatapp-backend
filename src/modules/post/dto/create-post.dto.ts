@@ -1,5 +1,5 @@
 import { Visibility } from '@/shared/constants/visibility.enum';
-import { IsNotEmpty } from 'class-validator';
+import { IsArray, IsNotEmpty, IsUUID } from 'class-validator';
 
 export class CreatePostDto {
   @IsNotEmpty()
@@ -7,4 +7,8 @@ export class CreatePostDto {
 
   @IsNotEmpty()
   visibility?: Visibility;
+
+  @IsArray()
+  @IsUUID('4', { each: true })
+  fileIds?: string[];
 }

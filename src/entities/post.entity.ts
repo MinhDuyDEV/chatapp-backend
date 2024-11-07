@@ -20,5 +20,5 @@ export class Post extends BaseEntity {
   visibility: Visibility;
 
   @OneToMany(() => File, (file) => file.post)
-  file: File[];
+  files: File[];
 }

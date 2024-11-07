@@ -3,13 +3,16 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Post } from '@/entities/post.entity';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
+import { File } from '@/entities/file.entity';
 
 @Injectable()
 export class PostService {
   constructor(
     @InjectRepository(Post)
     private postRepository: Repository<Post>,
+    @InjectRepository(File)
+    private fileRepository: Repository<File>,
   ) {}
 
   // Create a new post
@@ -18,23 +21,42 @@ export class PostService {
       ...createPostDto,
       author: { id: authorId },
     });
-    return this.postRepository.save(post);
+    const savedPost = await this.postRepository.save(post);
+
+    if (createPostDto.fileIds?.length > 0) {
+      const files = await this.fileRepository.findBy({
+        id: In(createPostDto.fileIds),
+      });
+
+      files.forEach((file) => (file.post = savedPost));
+      await this.fileRepository.save(files);
+    }
+
+    return await this.getPost(savedPost.id);
   }
 
   // Get all posts
   async findAll(): Promise<Post[]> {
-    return this.postRepository.find({
-      relations: ['author'],
-      order: { createdAt: 'DESC' },
-    });
+    return this.postRepository
+      .createQueryBuilder('post')
+      .leftJoinAndSelect('post.files', 'file')
+      .leftJoinAndSelect('post.author', 'author')
+      .orderBy('post.createdAt', 'DESC')
+      .getMany();
   }
 
   // Get a single post by id
   async getPost(id: string): Promise<Post> {
-    const post = await this.postRepository.findOne({ where: { id } });
+    const post = await this.postRepository
+      .createQueryBuilder('post')
+      .leftJoinAndSelect('post.files', 'file')
+      .leftJoinAndSelect('post.author', 'author')
+      .where('post.id = :id', { id })
+      .getOne();
     if (!post) {
       throw new NotFoundException(`Post not found`);
     }
+
     return post;
   }
 

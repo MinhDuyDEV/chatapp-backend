@@ -7,6 +7,8 @@ import {
   Delete,
   UseGuards,
   Put,
+  UseInterceptors,
+  ClassSerializerInterceptor,
 } from '@nestjs/common';
 import { PostService } from './post.service';
 import { CreatePostDto } from './dto/create-post.dto';
@@ -16,6 +18,7 @@ import { ROUTES } from '@/shared/constants/routes.enum';
 import { AuthUser } from '@/shared/decorators/auth-user.decorator';
 import { User } from '@/entities/user.entity';
 
+@UseInterceptors(ClassSerializerInterceptor)
 @Controller(ROUTES.POSTS)
 export class PostController {
   constructor(private readonly postService: PostService) {}
