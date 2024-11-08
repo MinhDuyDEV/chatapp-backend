@@ -90,14 +90,15 @@ export class MessageService {
   }
 
   async deleteMessage(param: DeleteMessageParam) {
-    const { user, conversationId, messageId } = param;
+    const { userId, conversationId, messageId } = param;
+    console.log('deleteMessage', param);
     const existedConversation =
       await this.conversationService.findConversationById(conversationId);
     if (!existedConversation)
       throw new ConflictException('Conversation not found');
 
     const { creator, recipient } = existedConversation;
-    if (creator.id !== user.id && recipient.id !== user.id)
+    if (creator.id !== userId && recipient.id !== userId)
       throw new ForbiddenException('Cannot Delete Message');
 
     const message = await this.messageRepository.findOne({

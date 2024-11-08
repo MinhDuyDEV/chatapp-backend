@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   HttpStatus,
   Post,
   Req,
@@ -49,6 +50,16 @@ export class AuthController {
     return res
       .status(HttpStatus.OK)
       .send(await this.authService.refreshToken(user, res));
+  }
+
+  @Get('profile')
+  async me(@AuthUser() user: User) {
+    return {
+      id: user.id,
+      email: user.email,
+      username: user.username,
+      avatar: user.avatar,
+    };
   }
 
   @UseGuards(JwtAccessTokenGuard)
