@@ -5,6 +5,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Post } from '@/entities/post.entity';
 import { In, Repository } from 'typeorm';
 import { File } from '@/entities/file.entity';
+import { PostResponseDto } from './dto/post-response.dto';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class PostService {
@@ -16,7 +18,10 @@ export class PostService {
   ) {}
 
   // Create a new post
-  async create(createPostDto: CreatePostDto, authorId: string): Promise<Post> {
+  async create(
+    createPostDto: CreatePostDto,
+    authorId: string,
+  ): Promise<PostResponseDto> {
     const post = this.postRepository.create({
       ...createPostDto,
       author: { id: authorId },
@@ -36,28 +41,60 @@ export class PostService {
   }
 
   // Get all posts
-  async findAll(): Promise<Post[]> {
-    return this.postRepository
+  async findAll(): Promise<PostResponseDto[]> {
+    const posts = await this.postRepository
       .createQueryBuilder('post')
       .leftJoinAndSelect('post.files', 'file')
       .leftJoinAndSelect('post.author', 'author')
+      .leftJoinAndSelect('post.likes', 'like')
+      .leftJoinAndSelect('like.user', 'user')
       .orderBy('post.createdAt', 'DESC')
       .getMany();
+
+    const postResponses = posts.map((post) => {
+      const postResponse = plainToInstance(PostResponseDto, post, {
+        excludeExtraneousValues: true,
+      });
+
+      postResponse.likes = post.likes.map((like) => ({
+        id: like.id,
+        userId: like.user.id,
+        username: like.user.username,
+        updatedAt: like.updatedAt,
+      }));
+
+      return postResponse;
+    });
+
+    return postResponses;
   }
 
   // Get a single post by id
-  async getPost(id: string): Promise<Post> {
+  async getPost(id: string): Promise<PostResponseDto> {
     const post = await this.postRepository
       .createQueryBuilder('post')
       .leftJoinAndSelect('post.files', 'file')
       .leftJoinAndSelect('post.author', 'author')
+      .leftJoinAndSelect('post.likes', 'like')
+      .leftJoinAndSelect('like.user', 'user')
       .where('post.id = :id', { id })
       .getOne();
     if (!post) {
       throw new NotFoundException(`Post not found`);
     }
 
-    return post;
+    const postResponse = plainToInstance(PostResponseDto, post, {
+      excludeExtraneousValues: true,
+    });
+
+    postResponse.likes = post.likes.map((like) => ({
+      id: like.id,
+      userId: like.user.id,
+      username: like.user.username,
+      updatedAt: like.updatedAt,
+    }));
+
+    return postResponse;
   }
 
   // Update an existing post
@@ -65,7 +102,7 @@ export class PostService {
     id: string,
     updatePostDto: UpdatePostDto,
     authorId: string,
-  ): Promise<Post> {
+  ): Promise<PostResponseDto> {
     const post = await this.postRepository.findOne({
       where: {
         id,
@@ -81,7 +118,11 @@ export class PostService {
     // Apply updates from UpdatePostDto into the found post
     Object.assign(post, updatePostDto);
 
-    return this.postRepository.save(post);
+    const updatedPost = await this.postRepository.save(post);
+
+    return plainToInstance(PostResponseDto, updatedPost, {
+      excludeExtraneousValues: true,
+    });
   }
 
   // Delete a post by ID

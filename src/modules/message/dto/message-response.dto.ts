@@ -1,6 +1,6 @@
 import { Expose } from 'class-transformer';
 
-import { UserResponse } from '@/modules/user/dto/user-response.dto';
+import { UserResponseDto } from '@/modules/user/dto/user-response.dto';
 import { Conversation } from '@/entities/conversation.entity';
 
 export class MessageResponse {
@@ -11,7 +11,7 @@ export class MessageResponse {
   content: string;
 
   @Expose()
-  author: UserResponse;
+  author: UserResponseDto;
 
   @Expose()
   createdAt: Date;
