@@ -18,6 +18,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 import { PostModule } from './modules/post/post.module';
 import { FileModule } from './modules/file/file.module';
 import { LikeModule } from './modules/like/like.module';
+import { CacheModule } from './modules/cache/cache.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { LikeModule } from './modules/like/like.module';
       }),
     }),
     EventEmitterModule.forRoot(),
+    CacheModule,
     AuthModule,
     UserModule,
     ConversationModule,

@@ -17,6 +17,9 @@ export class PostResponseDto {
   createdAt: Date;
 
   @Expose()
+  updatedAt: Date;
+
+  @Expose()
   @Type(() => UserPostResponseDto)
   author: UserPostResponseDto;
 

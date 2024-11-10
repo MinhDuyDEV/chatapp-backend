@@ -12,7 +12,7 @@ export class Post extends BaseEntity {
   @Column()
   content: string;
 
-  @ManyToOne(() => User, (user) => user.posts)
+  @ManyToOne(() => User, (user) => user.posts, { onDelete: 'CASCADE' })
   author: User;
 
   @Column({

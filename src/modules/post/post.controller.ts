@@ -26,17 +26,17 @@ export class PostController {
   @UseGuards(JwtAccessTokenGuard)
   @Post('create')
   create(@Body() createPostDto: CreatePostDto, @AuthUser() user: User) {
-    return this.postService.create(createPostDto, user.id);
+    return this.postService.createPost(createPostDto, user.id);
   }
 
   @Get()
-  async findAll() {
-    return this.postService.findAll();
+  async findAll(@AuthUser() user: User) {
+    return this.postService.getAllPosts({ userId: user.id });
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.postService.getPost(id);
+    return this.postService.getPostById(id);
   }
 
   @UseGuards(JwtAccessTokenGuard)
@@ -46,12 +46,12 @@ export class PostController {
     @Body() updatePostDto: UpdatePostDto,
     @AuthUser() user: User,
   ) {
-    return this.postService.update(id, updatePostDto, user.id);
+    return this.postService.updatePost(id, updatePostDto, user.id);
   }
 
   @UseGuards(JwtAccessTokenGuard)
   @Delete(':id')
   remove(@Param('id') id: string, @AuthUser() user: User) {
-    return this.postService.remove(id, user.id);
+    return this.postService.deletePost(id, user.id);
   }
 }

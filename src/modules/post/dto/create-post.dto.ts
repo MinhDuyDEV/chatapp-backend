@@ -1,5 +1,6 @@
+import { BaseFileResponseDto } from '@/modules/file/dto/base-file-response.dto';
 import { Visibility } from '@/shared/constants/visibility.enum';
-import { IsArray, IsNotEmpty, IsUUID } from 'class-validator';
+import { IsArray, IsNotEmpty } from 'class-validator';
 
 export class CreatePostDto {
   @IsNotEmpty()
@@ -9,6 +10,5 @@ export class CreatePostDto {
   visibility?: Visibility;
 
   @IsArray()
-  @IsUUID('4', { each: true })
-  fileIds?: string[];
+  fileIds?: BaseFileResponseDto[];
 }
