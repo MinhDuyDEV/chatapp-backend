@@ -31,12 +31,12 @@ export class PostController {
 
   @Get()
   async findAll(@AuthUser() user: User) {
-    return this.postService.getAllPosts({ userId: user.id });
+    return this.postService.getAllPosts(user.id);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.postService.getPostById(id);
+  findOne(@Param('id') id: string, @AuthUser() user: User) {
+    return this.postService.getPostById(id, user.id);
   }
 
   @UseGuards(JwtAccessTokenGuard)

@@ -1,6 +1,14 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  ParseIntPipe,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { LikeService } from './like.service';
-import { ToggleLikeDto } from './dto/toggle-like.dto';
 import { AuthUser } from '@/shared/decorators/auth-user.decorator';
 import { User } from '@/entities/user.entity';
 
@@ -8,9 +16,18 @@ import { User } from '@/entities/user.entity';
 export class LikeController {
   constructor(private readonly likeService: LikeService) {}
 
-  @Post('toggle-like')
-  async toggleLike(@Body() body: ToggleLikeDto, @AuthUser() user: User) {
-    const { postId } = body;
-    return await this.likeService.toggleLike(user, postId);
+  @Post('toggle-like/:postId')
+  @HttpCode(HttpStatus.OK)
+  async toggleLike(@AuthUser() user: User, @Param('postId') postId: string) {
+    return await this.likeService.toggleLike(user.id, postId);
+  }
+
+  @Get('post/:postId')
+  async getLikesByPost(
+    @Param('postId') postId: string,
+    @Query('page', ParseIntPipe) page = 1,
+    @Query('limit', ParseIntPipe) limit = 10,
+  ) {
+    return this.likeService.getLikesByPost(postId, page, limit);
   }
 }

@@ -1,7 +1,6 @@
 import { Like } from '@/entities/like.entity';
 import { Post } from '@/entities/post.entity';
 import { User } from '@/entities/user.entity';
-import { AuthUser } from '@/shared/decorators/auth-user.decorator';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -14,18 +13,18 @@ export class LikeService {
     @InjectRepository(User) private readonly userRepository: Repository<User>,
   ) {}
 
-  async toggleLike(@AuthUser() user: User, postId: string): Promise<string> {
-    const foundUser = await this.userRepository.findOneBy({ id: user.id });
+  async toggleLike(userId: string, postId: string): Promise<string> {
+    const user = await this.userRepository.findOneBy({ id: userId });
     const post = await this.postRepository.findOneBy({ id: postId });
 
-    if (!foundUser || !post) {
+    if (!user || !post) {
       throw new NotFoundException('User or post not found');
     }
 
     const existingLike = await this.likeRepository.findOne({
       where: {
         user: { id: user.id },
-        post: { id: postId },
+        post: { id: post.id },
       },
     });
 
@@ -37,5 +36,31 @@ export class LikeService {
       await this.likeRepository.save(like);
       return 'Post liked successfully';
     }
+  }
+
+  async getLikesByPost(postId: string, page: number, limit: number) {
+    const post = await this.postRepository.findOneBy({ id: postId });
+    if (!post) {
+      throw new NotFoundException('Post not found');
+    }
+
+    const [likes, total] = await this.likeRepository.findAndCount({
+      where: { post: { id: postId } },
+      relations: ['user'],
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+
+    return {
+      data: likes.map((like) => ({
+        userId: like.user.id,
+        username: like.user.username,
+        avatar: like.user.avatar,
+      })),
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
   }
 }

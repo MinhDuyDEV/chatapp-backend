@@ -19,27 +19,32 @@ export class PostService {
     private readonly cacheService: CacheService,
   ) {}
 
-  // Helper to map Post entity to PostResponseDto
-  private mapPostToResponseDto(post: Post): PostResponseDto {
+  private mapPostToResponseDto(
+    post: Post,
+    currentUserId: string,
+  ): PostResponseDto {
     const postResponse = plainToInstance(PostResponseDto, post, {
       excludeExtraneousValues: true,
     });
-    postResponse.likes = post.likes?.map((like) => ({
-      id: like.id,
-      userId: like.user.id,
-      username: like.user.username,
-      updatedAt: like.updatedAt,
-    }));
-    return postResponse;
-  }
 
-  // Cache helper function
-  private async setPostsCache(
-    key: string,
-    posts: PostResponseDto[],
-    ttl = 3600 * 1000,
-  ) {
-    await this.cacheService.set<PostResponseDto[]>(key, posts, ttl); // Cache for 1 hour
+    if (post.likes && post.likes.length > 0) {
+      const [firstLike, ...remainingLikes] = post.likes;
+      postResponse.likes = [
+        {
+          username: firstLike.user.username,
+        },
+      ];
+      postResponse.remainingLikeCount = remainingLikes.length;
+      postResponse.isLikedByCurrentUser = post.likes.some(
+        (like) => like.user.id === currentUserId,
+      );
+    } else {
+      postResponse.likes = [];
+      postResponse.remainingLikeCount = 0;
+      postResponse.isLikedByCurrentUser = false;
+    }
+
+    return postResponse;
   }
 
   // Create a new post
@@ -61,12 +66,10 @@ export class PostService {
       await this.fileRepository.save(files);
     }
 
-    await this.cacheAllPosts({ userId: authorId });
-    return this.getPostById(savedPost.id);
+    return this.getPostById(savedPost.id, authorId);
   }
 
-  // Fetch all posts from database and cache them
-  async cacheAllPosts({ userId }: { userId: string }): Promise<void> {
+  async getAllPosts(currentUserId: string): Promise<PostResponseDto[]> {
     const posts = await this.postRepository
       .createQueryBuilder('post')
       .leftJoinAndSelect('post.files', 'file')
@@ -76,31 +79,13 @@ export class PostService {
       .orderBy('post.createdAt', 'DESC')
       .getMany();
 
-    const postResponses = posts.map(this.mapPostToResponseDto);
-    await this.setPostsCache(`posts:${userId}`, postResponses);
+    return posts.map((post) => this.mapPostToResponseDto(post, currentUserId));
   }
 
-  // Retrieve all posts (from cache if available)
-  async getAllPosts({
-    userId,
-  }: {
-    userId: string;
-  }): Promise<PostResponseDto[]> {
-    const cachedPosts = await this.cacheService.get<PostResponseDto[]>(
-      `posts:${userId}`,
-    );
-    if (cachedPosts) return cachedPosts;
-
-    await this.cacheAllPosts({ userId });
-    return await this.cacheService.get<PostResponseDto[]>(`posts:${userId}`);
-  }
-
-  // Retrieve a single post by ID (from cache if available)
-  async getPostById(id: string): Promise<PostResponseDto> {
-    const cacheKey = `post:${id}`;
-    const cachedPost = await this.cacheService.get<PostResponseDto>(cacheKey);
-    if (cachedPost) return cachedPost;
-
+  async getPostById(
+    id: string,
+    currentUserId: string,
+  ): Promise<PostResponseDto> {
     const post = await this.postRepository
       .createQueryBuilder('post')
       .leftJoinAndSelect('post.files', 'file')
@@ -112,12 +97,9 @@ export class PostService {
 
     if (!post) throw new NotFoundException('Post not found');
 
-    const postResponse = this.mapPostToResponseDto(post);
-    await this.cacheService.set(cacheKey, postResponse, 3600 * 1000); // Cache for 1 hour
-    return postResponse;
+    return this.mapPostToResponseDto(post, currentUserId);
   }
 
-  // Update an existing post
   async updatePost(
     id: string,
     updatePostDto: UpdatePostDto,
@@ -131,10 +113,7 @@ export class PostService {
     Object.assign(post, updatePostDto);
     const updatedPost = await this.postRepository.save(post);
 
-    await this.cacheService.delete(`post:${id}`);
-    await this.cacheService.delete(`posts:${authorId}`);
-
-    return this.mapPostToResponseDto(updatedPost);
+    return this.mapPostToResponseDto(updatedPost, authorId);
   }
 
   // Delete a post by ID
@@ -148,9 +127,6 @@ export class PostService {
     });
     if (result.affected === 0)
       throw new NotFoundException('Post not found or unauthorized');
-
-    await this.cacheService.delete(`post:${id}`);
-    await this.cacheService.delete(`posts:${authorId}`);
 
     return { success: true, message: 'Post has been deleted successfully' };
   }
