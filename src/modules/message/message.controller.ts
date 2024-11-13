@@ -4,6 +4,7 @@ import {
   Controller,
   Delete,
   Get,
+  Inject,
   Param,
   Patch,
   Post,
@@ -13,17 +14,17 @@ import {
 import { User } from '@/entities/user.entity';
 import { ROUTES } from '@/shared/constants/routes.enum';
 import { AuthUser } from '@/shared/decorators/auth-user.decorator';
-
-import { MessageService } from './message.service';
 import { CreateMessageDto } from './dto/create-message.dto';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { EditMessageDto } from '@/modules/message/dto/edit-message.dto';
+import { Services } from '@/shared/constants/services.enum';
+import { IMessageService } from '@/modules/message/messages';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller(ROUTES.MESSAGES)
 export class MessageController {
   constructor(
-    private readonly messageService: MessageService,
+    @Inject(Services.MESSAGES) private readonly messageService: IMessageService,
     private readonly eventEmitter: EventEmitter2,
   ) {}
 

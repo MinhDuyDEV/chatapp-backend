@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   HttpStatus,
+  Inject,
   Post,
   Req,
   Res,
@@ -15,16 +16,19 @@ import { ROUTES } from '@/shared/constants/routes.enum';
 import { Public } from '@/shared/decorators/public.decorator';
 import { AuthUser } from '@/shared/decorators/auth-user.decorator';
 import { AuthenticatedRequest } from '@/shared/types/authenticated-request.type';
-
-import { AuthService } from './auth.service';
 import { SignupDto } from './dto/signup.dto';
 import { LocalAuthGuard } from './guards/local.guard';
 import { JwtRefreshTokenGuard } from './guards/jwt-refresh-token.guard';
 import { JwtAccessTokenGuard } from './guards/jwt-access-token.guard';
+import { Services } from '@/shared/constants/services.enum';
+import { IAuthService } from '@/modules/auth/auth';
 
 @Controller(ROUTES.AUTH)
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    @Inject(Services.AUTH)
+    private readonly authService: IAuthService,
+  ) {}
 
   @Public()
   @Post('signup')

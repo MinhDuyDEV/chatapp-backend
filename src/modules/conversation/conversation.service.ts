@@ -1,28 +1,30 @@
 import {
   BadRequestException,
   ConflictException,
+  Inject,
   Injectable,
-  NotFoundException,
 } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { User } from '@/entities/user.entity';
 import { Message } from '@/entities/message.entity';
-import { UserService } from '@/modules/user/user.service';
 import { Conversation } from '@/entities/conversation.entity';
-import { MessageService } from '@/modules/message/message.service';
-
 import { CreateConversationParams } from './types/create-conversation-params';
 import { UpdateConversationParams } from '@/modules/conversation/types/update-conversation-params';
+import { Services } from '@/shared/constants/services.enum';
+import { IMessageService } from '@/modules/message/messages';
+import { IConversationsService } from '@/modules/conversation/conversations';
+import { IUserService } from '@/modules/user/users';
 
 @Injectable()
-export class ConversationService {
+export class ConversationService implements IConversationsService {
   constructor(
     @InjectRepository(Conversation)
     private readonly conversationRepository: Repository<Conversation>,
-    private readonly userService: UserService,
-    private readonly messageService: MessageService,
+    @Inject(Services.USERS) private readonly userService: IUserService,
+    @Inject(Services.MESSAGES)
+    private readonly messageService: IMessageService,
   ) {}
 
   async getConversations(id: string): Promise<Conversation[]> {
@@ -100,7 +102,7 @@ export class ConversationService {
     return this.conversationRepository.save(conversation);
   }
 
-  update({ id, lastMessageSent }: UpdateConversationParams) {
+  update({ id, lastMessageSent }: UpdateConversationParams): Promise<any> {
     return this.conversationRepository.update(id, { lastMessageSent });
   }
 }

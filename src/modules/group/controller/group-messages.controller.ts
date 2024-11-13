@@ -1,0 +1,74 @@
+import {
+  BadRequestException,
+  Body,
+  ClassSerializerInterceptor,
+  Controller,
+  Delete,
+  Get,
+  Inject,
+  Param,
+  Post,
+  UploadedFiles,
+  UseInterceptors,
+} from '@nestjs/common';
+import { ROUTES } from '@/shared/constants/routes.enum';
+import { Services } from '@/shared/constants/services.enum';
+import { IGroupMessageService } from '@/modules/group/interfaces/group-messages';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { AuthUser } from '@/shared/decorators/auth-user.decorator';
+import { User } from '@/entities/user.entity';
+import { Attachment } from '@/modules/group/types/update-group-details-params.type';
+import { CreateMessageDto } from '@/modules/message/dto/create-message.dto';
+
+@UseInterceptors(ClassSerializerInterceptor)
+@Controller(ROUTES.GROUP_MESSAGES)
+export class GroupMessageController {
+  constructor(
+    @Inject(Services.GROUP_MESSAGES)
+    private readonly groupMessageService: IGroupMessageService,
+    private eventEmitter: EventEmitter2,
+  ) {}
+
+  @Post()
+  async createGroupMessage(
+    @AuthUser() user: User,
+    // @UploadedFiles() { attachments }: { attachments: Attachment[] },
+    @Param('groupId') groupId: string,
+    @Body() { content }: CreateMessageDto,
+  ) {
+    if (!content)
+      throw new BadRequestException('No content or attachments provided');
+    const params = { groupId, author: user, content };
+    const response = await this.groupMessageService.createGroupMessage(params);
+    this.eventEmitter.emit('group.message.create', response);
+    return;
+  }
+
+  @Get()
+  async getGroupMessages(
+    @AuthUser() user: User,
+    @Param('groupId') groupId: string,
+  ) {
+    const messages = await this.groupMessageService.getGroupMessages(groupId);
+    return { groupId, messages };
+  }
+
+  @Delete(':messageId')
+  async deleteGroupMessage(
+    @AuthUser() user: User,
+    @Param('groupId') groupId: string,
+    @Param('messageId') messageId: string,
+  ) {
+    await this.groupMessageService.deleteGroupMessage({
+      userId: user.id,
+      messageId,
+      groupId,
+    });
+    this.eventEmitter.emit('group.message.delete', {
+      userId: user.id,
+      messageId,
+      groupId,
+    });
+    return { groupId, messageId };
+  }
+}

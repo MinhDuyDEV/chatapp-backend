@@ -17,6 +17,7 @@ import { EventsModule } from './modules/events/events.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { PostModule } from './modules/post/post.module';
 import { FileModule } from './modules/file/file.module';
+import { GroupModule } from './modules/group/group.module';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { FileModule } from './modules/file/file.module';
     EventsModule,
     PostModule,
     FileModule,
+    GroupModule,
   ],
   controllers: [],
   providers: [

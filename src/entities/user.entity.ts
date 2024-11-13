@@ -1,8 +1,15 @@
 import { Exclude } from 'class-transformer';
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  OneToMany,
+  ManyToMany,
+} from 'typeorm';
 
 import { Message } from './message.entity';
 import { Post } from './post.entity';
+import { Group } from '@/entities/group.entity';
 
 @Entity('users')
 export class User {
@@ -28,6 +35,9 @@ export class User {
 
   @OneToMany(() => Message, (message) => message.author)
   messages: Message[];
+
+  @ManyToMany(() => Group, (group) => group.users)
+  groups: Group[];
 
   @OneToMany(() => Post, (post) => post.author)
   posts: Post[];
