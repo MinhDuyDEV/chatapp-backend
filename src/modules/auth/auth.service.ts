@@ -1,7 +1,7 @@
 import { Response } from 'express';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 
 import {
   access_token_private_key,
@@ -12,14 +12,15 @@ import { User } from '@/entities/user.entity';
 import { compareText, hashText } from '@/shared/utils/auth-helpers';
 
 import { SignupDto } from './dto/signup.dto';
-import { UserService } from '../user/user.service';
 import { TokenPayload } from './types/token-payload.type';
 import { AuthResponse } from './types/auth-response.type';
+import { Services } from '@/shared/constants/services.enum';
+import { IUserService } from '@/modules/user/users';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly userService: UserService,
+    @Inject(Services.USERS) private readonly userService: IUserService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
   ) {}

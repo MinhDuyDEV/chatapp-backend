@@ -6,22 +6,24 @@ import {
   Param,
   UseInterceptors,
   ClassSerializerInterceptor,
+  Inject,
 } from '@nestjs/common';
 
 import { User } from '@/entities/user.entity';
 import { ROUTES } from '@/shared/constants/routes.enum';
 import { AuthUser } from '@/shared/decorators/auth-user.decorator';
-
-import { ConversationService } from './conversation.service';
 import { CreateConversationDto } from './dto/create-conversation.dto';
 import { Conversation } from '@/entities/conversation.entity';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { Services } from '@/shared/constants/services.enum';
+import { IConversationsService } from '@/modules/conversation/conversations';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller(ROUTES.CONVERSATIONS)
 export class ConversationController {
   constructor(
-    private readonly conversationService: ConversationService,
+    @Inject(Services.CONVERSATIONS)
+    private readonly conversationService: IConversationsService,
     private readonly eventEmitter: EventEmitter2,
   ) {}
 

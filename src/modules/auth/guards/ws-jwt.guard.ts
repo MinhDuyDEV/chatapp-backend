@@ -1,6 +1,7 @@
 import {
   CanActivate,
   ExecutionContext,
+  Inject,
   Injectable,
   Logger,
 } from '@nestjs/common';
@@ -8,10 +9,15 @@ import { AuthService } from '@/modules/auth/auth.service';
 import { TokenPayload } from '@/modules/auth/types/token-payload.type';
 import * as cookie from 'cookie';
 import { AuthenticatedSocket } from '@/modules/events/types';
+import { IAuthService } from '@/modules/auth/auth';
+import { Services } from '@/shared/constants/services.enum';
 
 @Injectable()
 export class WsJwtGuard implements CanActivate {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    @Inject(Services.AUTH)
+    private readonly authService: IAuthService,
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     if (context.getType() !== 'ws') {
@@ -30,7 +36,7 @@ export class WsJwtGuard implements CanActivate {
 
   static async validateToken(
     client: AuthenticatedSocket,
-    authService: AuthService,
+    authService: IAuthService,
   ) {
     const cookies = client.handshake.headers.cookie;
     const parsedCookies = cookie.parse(cookies);

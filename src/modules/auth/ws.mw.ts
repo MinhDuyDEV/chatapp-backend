@@ -1,14 +1,14 @@
 import { Socket } from 'socket.io';
 import { WsJwtGuard } from '@/modules/auth/guards/ws-jwt.guard';
-import { AuthService } from '@/modules/auth/auth.service';
 import { AuthenticatedSocket } from '@/modules/events/types';
+import { IAuthService } from '@/modules/auth/auth';
 
 export type SocketIOMiddleware = {
   (client: Socket, next: (err?: any) => void): void;
 };
 
 export const SocketAuthMiddleware = (
-  authService: AuthService,
+  authService: IAuthService,
 ): SocketIOMiddleware => {
   return async (client: AuthenticatedSocket, next) => {
     try {

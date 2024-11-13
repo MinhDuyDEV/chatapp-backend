@@ -19,6 +19,7 @@ import { PostModule } from './modules/post/post.module';
 import { FileModule } from './modules/file/file.module';
 import { LikeModule } from './modules/like/like.module';
 import { CacheModule } from './modules/cache/cache.module';
+import { GroupModule } from './modules/group/group.module';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { CacheModule } from './modules/cache/cache.module';
     PostModule,
     FileModule,
     LikeModule,
+    GroupModule,
   ],
   controllers: [],
   providers: [

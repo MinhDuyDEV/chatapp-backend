@@ -19,11 +19,15 @@ export class UserService {
 
   async findUser(params: FindUserParams): Promise<User> {
     return await this.userRepository.findOne({
-      where: [{ id: params.id }, { email: params.email }],
+      where: [
+        { id: params.id },
+        { email: params.email },
+        { username: params.username },
+      ],
     });
   }
 
-  async saveRefreshToken(token: string, userId: string) {
+  async saveRefreshToken(token: string, userId: string): Promise<any> {
     return await this.userRepository.update(userId, { refreshToken: token });
   }
 
@@ -31,7 +35,7 @@ export class UserService {
     return await this.userRepository.save(params);
   }
 
-  async deleteRefreshToken(userId: string) {
+  async deleteRefreshToken(userId: string): Promise<any> {
     return await this.userRepository.update(userId, { refreshToken: null });
   }
 }

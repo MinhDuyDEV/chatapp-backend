@@ -9,21 +9,22 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { Message } from '@/entities/message.entity';
-import { ConversationService } from '@/modules/conversation/conversation.service';
-
 import { CreateMessageParams } from './types/create-message-params.type';
 import { User } from '@/entities/user.entity';
 import { DeleteMessageParam } from '@/modules/message/types/delete-message-param.type';
 import { Conversation } from '@/entities/conversation.entity';
 import { EditMessageParams } from '@/modules/message/types/edit-message-params.type';
+import { IMessageService } from '@/modules/message/messages';
+import { Services } from '@/shared/constants/services.enum';
+import { IConversationsService } from '@/modules/conversation/conversations';
 
 @Injectable()
-export class MessageService {
+export class MessageService implements IMessageService {
   constructor(
     @InjectRepository(Message)
     private readonly messageRepository: Repository<Message>,
-    @Inject(forwardRef(() => ConversationService))
-    private readonly conversationService: ConversationService,
+    @Inject(forwardRef(() => Services.CONVERSATIONS))
+    private readonly conversationService: IConversationsService,
   ) {}
 
   async createMessage({
@@ -72,7 +73,7 @@ export class MessageService {
     };
   }
 
-  async getMessages(user, conversationId: string): Promise<Message[]> {
+  async getMessages(user: User, conversationId: string): Promise<Message[]> {
     const existedConversation =
       await this.conversationService.findConversationById(conversationId);
     if (!existedConversation)
@@ -89,7 +90,7 @@ export class MessageService {
     });
   }
 
-  async deleteMessage(param: DeleteMessageParam) {
+  async deleteMessage(param: DeleteMessageParam): Promise<any> {
     const { userId, conversationId, messageId } = param;
     console.log('deleteMessage', param);
     const existedConversation =
@@ -111,7 +112,10 @@ export class MessageService {
     return this.deleteLastMessage(existedConversation, message);
   }
 
-  async deleteLastMessage(conversation: Conversation, message: Message) {
+  async deleteLastMessage(
+    conversation: Conversation,
+    message: Message,
+  ): Promise<any> {
     const size = conversation.messages.length;
     const SECOND_MESSAGE_INDEX = 1;
     if (size <= SECOND_MESSAGE_INDEX) {

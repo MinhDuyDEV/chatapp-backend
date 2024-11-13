@@ -7,6 +7,7 @@ import { MessageModule } from '@/modules/message/message.module';
 
 import { ConversationService } from './conversation.service';
 import { ConversationController } from './conversation.controller';
+import { Services } from '@/shared/constants/services.enum';
 
 @Module({
   imports: [
@@ -15,7 +16,17 @@ import { ConversationController } from './conversation.controller';
     forwardRef(() => MessageModule),
   ],
   controllers: [ConversationController],
-  providers: [ConversationService],
-  exports: [ConversationService],
+  providers: [
+    {
+      provide: Services.CONVERSATIONS,
+      useClass: ConversationService,
+    },
+  ],
+  exports: [
+    {
+      provide: Services.CONVERSATIONS,
+      useClass: ConversationService,
+    },
+  ],
 })
 export class ConversationModule {}

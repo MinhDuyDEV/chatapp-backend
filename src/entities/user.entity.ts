@@ -1,5 +1,5 @@
 import { Exclude } from 'class-transformer';
-import { Entity, Column, OneToMany } from 'typeorm';
+import { Entity, Column, OneToMany, ManyToMany } from 'typeorm';
 import { Message } from './message.entity';
 import { Post } from './post.entity';
 import { Like } from './like.entity';
@@ -7,6 +7,7 @@ import { Comment } from './comment.entity';
 import { Share } from './share.entity';
 import { BaseEntity } from './base.entity';
 import { IsDateString } from 'class-validator';
+import { Group } from '@/entities/group.entity';
 
 @Entity('users')
 export class User extends BaseEntity {
@@ -42,6 +43,9 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Message, (message) => message.author)
   messages: Message[];
+
+  @ManyToMany(() => Group, (group) => group.users)
+  groups: Group[];
 
   @OneToMany(() => Post, (post) => post.author)
   posts: Post[];
