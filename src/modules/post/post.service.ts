@@ -76,6 +76,7 @@ export class PostService {
       .leftJoinAndSelect('post.author', 'author')
       .leftJoinAndSelect('post.likes', 'like')
       .leftJoinAndSelect('like.user', 'user')
+      .loadRelationCountAndMap('post.commentCount', 'post.comments')
       .orderBy('post.createdAt', 'DESC')
       .getMany();
 
@@ -92,6 +93,7 @@ export class PostService {
       .leftJoinAndSelect('post.author', 'author')
       .leftJoinAndSelect('post.likes', 'like')
       .leftJoinAndSelect('like.user', 'user')
+      .loadRelationCountAndMap('post.commentCount', 'post.comments')
       .where('post.id = :id', { id })
       .getOne();
 
