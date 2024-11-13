@@ -1,7 +1,11 @@
-import { Exclude } from 'class-transformer';
-import { UserResponseDto } from './user-response.dto';
+import { Expose } from 'class-transformer';
+export class UserPostResponseDto {
+  @Expose()
+  id: string;
 
-export class UserPostResponseDto extends UserResponseDto {
-  @Exclude()
-  email: string;
+  @Expose()
+  username: string;
+
+  @Expose()
+  avatar: string;
 }

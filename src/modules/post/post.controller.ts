@@ -29,11 +29,13 @@ export class PostController {
     return this.postService.createPost(createPostDto, user.id);
   }
 
+  @UseGuards(JwtAccessTokenGuard)
   @Get()
   async findAll(@AuthUser() user: User) {
     return this.postService.getAllPosts(user.id);
   }
 
+  @UseGuards(JwtAccessTokenGuard)
   @Get(':id')
   findOne(@Param('id') id: string, @AuthUser() user: User) {
     return this.postService.getPostById(id, user.id);
