@@ -14,18 +14,17 @@ import { AuthUser } from '@/shared/decorators/auth-user.decorator';
 import { User } from '@/entities/user.entity';
 import { JwtAccessTokenGuard } from '../auth/guards/jwt-access-token.guard';
 
+@UseGuards(JwtAccessTokenGuard)
 @Controller('like')
 export class LikeController {
   constructor(private readonly likeService: LikeService) {}
 
-  @UseGuards(JwtAccessTokenGuard)
   @Post('toggle-like/:postId')
   @HttpCode(HttpStatus.OK)
   async toggleLike(@AuthUser() user: User, @Param('postId') postId: string) {
     return await this.likeService.toggleLike(user.id, postId);
   }
 
-  @UseGuards(JwtAccessTokenGuard)
   @Get('post/:postId')
   async getLikesByPost(
     @Param('postId') postId: string,

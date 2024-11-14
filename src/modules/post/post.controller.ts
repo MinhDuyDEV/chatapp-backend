@@ -9,6 +9,8 @@ import {
   Put,
   UseInterceptors,
   ClassSerializerInterceptor,
+  Query,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { PostService } from './post.service';
 import { CreatePostDto } from './dto/create-post.dto';
@@ -19,29 +21,30 @@ import { AuthUser } from '@/shared/decorators/auth-user.decorator';
 import { User } from '@/entities/user.entity';
 
 @UseInterceptors(ClassSerializerInterceptor)
+@UseGuards(JwtAccessTokenGuard)
 @Controller(ROUTES.POSTS)
 export class PostController {
   constructor(private readonly postService: PostService) {}
 
-  @UseGuards(JwtAccessTokenGuard)
   @Post('create')
   create(@Body() createPostDto: CreatePostDto, @AuthUser() user: User) {
     return this.postService.createPost(createPostDto, user.id);
   }
 
-  @UseGuards(JwtAccessTokenGuard)
   @Get()
-  async findAll(@AuthUser() user: User) {
-    return this.postService.getAllPosts(user.id);
+  async findAll(
+    @AuthUser() user: User,
+    @Query('page', ParseIntPipe) page = 1,
+    @Query('limit', ParseIntPipe) limit = 5,
+  ) {
+    return this.postService.getAllPosts(user.id, page, limit);
   }
 
-  @UseGuards(JwtAccessTokenGuard)
   @Get(':id')
   findOne(@Param('id') id: string, @AuthUser() user: User) {
     return this.postService.getPostById(id, user.id);
   }
 
-  @UseGuards(JwtAccessTokenGuard)
   @Put(':id')
   update(
     @Param('id') id: string,
@@ -51,7 +54,6 @@ export class PostController {
     return this.postService.updatePost(id, updatePostDto, user.id);
   }
 
-  @UseGuards(JwtAccessTokenGuard)
   @Delete(':id')
   remove(@Param('id') id: string, @AuthUser() user: User) {
     return this.postService.deletePost(id, user.id);

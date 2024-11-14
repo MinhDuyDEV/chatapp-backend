@@ -7,7 +7,7 @@ import { In, Repository } from 'typeorm';
 import { File } from '@/entities/file.entity';
 import { PostResponseDto } from './dto/post-response.dto';
 import { plainToInstance } from 'class-transformer';
-import { CacheService } from '../cache/cache.service';
+import { Comment } from '@/entities/comment.entity';
 
 @Injectable()
 export class PostService {
@@ -16,7 +16,8 @@ export class PostService {
     private readonly postRepository: Repository<Post>,
     @InjectRepository(File)
     private readonly fileRepository: Repository<File>,
-    private readonly cacheService: CacheService,
+    @InjectRepository(Comment)
+    private readonly commentRepository: Repository<Comment>,
   ) {}
 
   private mapPostToResponseDto(
@@ -69,8 +70,8 @@ export class PostService {
     return this.getPostById(savedPost.id, authorId);
   }
 
-  async getAllPosts(currentUserId: string): Promise<PostResponseDto[]> {
-    const posts = await this.postRepository
+  async getAllPosts(currentUserId: string, page: number, limit: number) {
+    const [posts, total] = await this.postRepository
       .createQueryBuilder('post')
       .leftJoinAndSelect('post.files', 'file')
       .leftJoinAndSelect('post.author', 'author')
@@ -78,9 +79,31 @@ export class PostService {
       .leftJoinAndSelect('like.user', 'user')
       .loadRelationCountAndMap('post.commentCount', 'post.comments')
       .orderBy('post.createdAt', 'DESC')
-      .getMany();
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getManyAndCount();
 
-    return posts.map((post) => this.mapPostToResponseDto(post, currentUserId));
+    const postsWithCommentCount = await Promise.all(
+      posts.map(async (post) => {
+        const commentCount = await this.commentRepository.count({
+          where: { post: { id: post.id } },
+        });
+        return {
+          ...post,
+          commentCount,
+        };
+      }),
+    );
+
+    return {
+      data: postsWithCommentCount.map((post) =>
+        this.mapPostToResponseDto(post, currentUserId),
+      ),
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
   }
 
   async getPostById(
