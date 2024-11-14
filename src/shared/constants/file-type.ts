@@ -1,4 +1,5 @@
 export enum FileType {
-  IMAGE = 'image',
-  VIDEO = 'video',
+  AVATAR = 'avatar',
+  MESSAGE = 'message',
+  POST_IMAGE = 'post-image',
 }

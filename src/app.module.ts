@@ -17,7 +17,10 @@ import { EventsModule } from './modules/events/events.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { PostModule } from './modules/post/post.module';
 import { FileModule } from './modules/file/file.module';
+import { LikeModule } from './modules/like/like.module';
+import { CacheModule } from './modules/cache/cache.module';
 import { GroupModule } from './modules/group/group.module';
+import { CommentModule } from './modules/comment/comment.module';
 
 @Module({
   imports: [
@@ -41,6 +44,7 @@ import { GroupModule } from './modules/group/group.module';
       }),
     }),
     EventEmitterModule.forRoot(),
+    CacheModule,
     AuthModule,
     UserModule,
     ConversationModule,
@@ -48,7 +52,9 @@ import { GroupModule } from './modules/group/group.module';
     EventsModule,
     PostModule,
     FileModule,
+    LikeModule,
     GroupModule,
+    CommentModule,
   ],
   controllers: [],
   providers: [

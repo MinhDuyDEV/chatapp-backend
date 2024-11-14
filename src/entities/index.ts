@@ -3,6 +3,9 @@ import { Message } from './message.entity';
 import { Conversation } from './conversation.entity';
 import { Post } from './post.entity';
 import { File } from './file.entity';
+import { Like } from './like.entity';
+import { Comment } from './comment.entity';
+import { Share } from './share.entity';
 import { Group } from '@/entities/group.entity';
 import { GroupMessage } from '@/entities/group-message.entity';
 import { GroupMessageAttachment } from '@/entities/group-message-attachment.entity';
@@ -12,6 +15,11 @@ const entities = [
   User,
   Conversation,
   Message,
+  Post,
+  File,
+  Like,
+  Comment,
+  Share,
   MessageAttachment,
   Post,
   File,
@@ -20,6 +28,6 @@ const entities = [
   GroupMessageAttachment,
 ];
 
-export { User, Conversation, Message, Post, File };
+export { User, Conversation, Message, Post, File, Like, Comment, Share };
 
 export default entities;

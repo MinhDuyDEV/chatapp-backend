@@ -1,5 +1,6 @@
+import { BaseFileResponseDto } from '@/modules/file/dto/base-file-response.dto';
 import { Visibility } from '@/shared/constants/visibility.enum';
-import { IsNotEmpty } from 'class-validator';
+import { IsArray, IsNotEmpty } from 'class-validator';
 
 export class CreatePostDto {
   @IsNotEmpty()
@@ -7,4 +8,7 @@ export class CreatePostDto {
 
   @IsNotEmpty()
   visibility?: Visibility;
+
+  @IsArray()
+  fileIds?: BaseFileResponseDto[];
 }

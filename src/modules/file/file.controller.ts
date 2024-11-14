@@ -30,9 +30,9 @@ export class FileController {
   @UseGuards(JwtAccessTokenGuard)
   @UseInterceptors(FilesInterceptor('file'))
   async uploadMultipleFile(
-    @UploadedFiles() file: Express.Multer.File[],
+    @UploadedFiles() files: Express.Multer.File[],
     @Body() data: UploadFileDto,
   ): Promise<UploadFileResponseDto[]> {
-    return this.fileService.uploadMultiple(file, data);
+    return this.fileService.uploadMultiple(files, data);
   }
 }

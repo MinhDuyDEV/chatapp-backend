@@ -5,7 +5,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { v4 as uuid } from 'uuid';
 import { UploadFileDto, UploadFileResponseDto } from './dto/upload-file.dto';
-import { getSignedUrl } from '@aws-sdk/cloudfront-signer';
 
 @Injectable()
 export class FileService {
@@ -56,15 +55,9 @@ export class FileService {
       throw new InternalServerErrorException('Error saving file to database');
     }
 
-    const signedUrl = getSignedUrl({
-      url: newFile.url,
-      keyPairId: process.env.CLOUDFRONT_KEY_PAIR_ID,
-      privateKey: process.env.CLOUDFRONT_PRIVATE_KEY,
-      dateLessThan: new Date(Date.now() + 60 * 60 * 1000).toDateString(), // expires in 1 hour
-    });
-
     return {
-      url: signedUrl,
+      id: newFile.id,
+      url: newFile.url,
     };
   }
 
@@ -74,8 +67,6 @@ export class FileService {
   ): Promise<UploadFileResponseDto[]> {
     const uploadPromises = files.map((file) => this.upload(file, data));
 
-    const uploadedFiles = await Promise.all(uploadPromises);
-
-    return uploadedFiles;
+    return Promise.all(uploadPromises);
   }
 }

@@ -1,11 +1,7 @@
 import { Expose } from 'class-transformer';
-
-export class UserResponseDto {
+export class UserPostResponseDto {
   @Expose()
   id: string;
-
-  @Expose()
-  email: string;
 
   @Expose()
   username: string;

@@ -12,6 +12,13 @@ export default registerAs('config', () => ({
     database: process.env.DB_NAME || 'chatapp',
   },
 
+  redis: {
+    host: process.env.REDIS_HOST || 'localhost',
+    port: parseInt(process.env.REDIS_PORT, 10) || 6379,
+    username: process.env.REDIS_USERNAME || 'user',
+    password: process.env.REDIS_PASSWORD || 'pass',
+  },
+
   access_token: {
     secret: process.env.JWT_ACCESS_TOKEN_SECRET || 'defaultSecretKey',
     expiresIn: process.env.JWT_ACCESS_TOKEN_EXPIRES_IN || '1800',
