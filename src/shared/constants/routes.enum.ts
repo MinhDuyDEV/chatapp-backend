@@ -7,4 +7,6 @@ export enum ROUTES {
   GROUPS = 'groups',
   GROUP_MESSAGES = 'groups/:groupId/messages',
   GROUP_RECIPIENTS = 'groups/:groupId/recipients',
+  FRIENDS = 'friends',
+  FRIEND_REQUESTS = 'friends/requests',
 }
