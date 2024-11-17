@@ -6,7 +6,7 @@ FROM node:20 AS builder
 WORKDIR /usr/src/app
 
 # Copy package.json and package-lock.json
-COPY package*.json ./
+COPY package.json package-lock.json ./
 
 # Install dependencies
 RUN npm install
@@ -25,17 +25,14 @@ FROM node:20
 # Set working directory
 WORKDIR /usr/src/app
 
+# Copy package.json and package-lock.json
+COPY --from=builder /usr/src/app/package.json /usr/src/app/package-lock.json ./
+
 # Copy dist folder from the previous builder stage
 COPY --from=builder /usr/src/app/dist ./dist
 
-# Copy package.json and package-lock.json
-COPY package*.json ./
-
 # Install production dependencies
 RUN npm install --only=production
-
-# Expose the application port
-EXPOSE 8000
 
 # Command to run the app in production mode
 ENTRYPOINT ["node", "dist/main.js"]
