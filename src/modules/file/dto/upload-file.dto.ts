@@ -10,4 +10,5 @@ export class UploadFileDto {
 export class UploadFileResponseDto {
   id: string;
   url: string;
+  mimetype: string;
 }

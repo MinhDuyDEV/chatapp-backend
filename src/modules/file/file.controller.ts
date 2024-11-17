@@ -12,12 +12,12 @@ import { JwtAccessTokenGuard } from '../auth/guards/jwt-access-token.guard';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { UploadFileDto, UploadFileResponseDto } from './dto/upload-file.dto';
 
+@UseGuards(JwtAccessTokenGuard)
 @Controller('file')
 export class FileController {
   constructor(private readonly fileService: FileService) {}
 
   @Post('upload')
-  @UseGuards(JwtAccessTokenGuard)
   @UseInterceptors(FileInterceptor('file'))
   async uploadFile(
     @UploadedFile() file: Express.Multer.File,
@@ -27,7 +27,6 @@ export class FileController {
   }
 
   @Post('multiple-upload')
-  @UseGuards(JwtAccessTokenGuard)
   @UseInterceptors(FilesInterceptor('file'))
   async uploadMultipleFile(
     @UploadedFiles() files: Express.Multer.File[],

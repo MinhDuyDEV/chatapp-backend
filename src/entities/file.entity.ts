@@ -20,6 +20,9 @@ export class File extends BaseEntity {
   type: FileType;
 
   @Column()
+  mimetype: string;
+
+  @Column()
   url: string;
 
   @Column()
