@@ -6,4 +6,7 @@ export class BaseFileResponseDto {
 
   @Expose()
   url: string;
+
+  @Expose()
+  mimetype: string;
 }

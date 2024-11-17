@@ -49,6 +49,7 @@ export class FileService {
       name: file.originalname,
       key,
       type,
+      mimetype: file.mimetype,
       url: `${process.env.CLOUDFRONT_URL}/${key}`,
     });
     if (!newFile) {
@@ -58,6 +59,7 @@ export class FileService {
     return {
       id: newFile.id,
       url: newFile.url,
+      mimetype: newFile.mimetype,
     };
   }
 
