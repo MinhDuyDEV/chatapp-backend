@@ -34,8 +34,5 @@ COPY --from=builder /usr/src/app/dist ./dist
 # Install production dependencies
 RUN npm install --only=production
 
-# Expose the application port
-EXPOSE 8000
-
 # Command to run the app in production mode
 ENTRYPOINT ["node", "dist/main.js"]
