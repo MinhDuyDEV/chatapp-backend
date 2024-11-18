@@ -21,6 +21,8 @@ import { LikeModule } from './modules/like/like.module';
 import { CacheModule } from './modules/cache/cache.module';
 import { GroupModule } from './modules/group/group.module';
 import { CommentModule } from './modules/comment/comment.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { CronjobsModule } from './modules/cronjobs/cronjobs.module';
 
 @Module({
   imports: [
@@ -44,6 +46,8 @@ import { CommentModule } from './modules/comment/comment.module';
       }),
     }),
     EventEmitterModule.forRoot(),
+    ScheduleModule.forRoot(),
+    CronjobsModule,
     CacheModule,
     AuthModule,
     UserModule,

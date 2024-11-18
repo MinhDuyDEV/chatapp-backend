@@ -9,7 +9,7 @@ import { Share } from './share.entity';
 
 @Entity('posts')
 export class Post extends BaseEntity {
-  @Column()
+  @Column({ nullable: true })
   content: string;
 
   @ManyToOne(() => User, (user) => user.posts, { onDelete: 'CASCADE' })
@@ -18,7 +18,6 @@ export class Post extends BaseEntity {
   @Column({
     type: 'enum',
     enum: Visibility,
-    default: Visibility.PUBLIC,
   })
   visibility: Visibility;
 

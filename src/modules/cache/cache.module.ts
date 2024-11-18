@@ -12,7 +12,11 @@ import { CacheService } from './cache.service';
     {
       provide: 'KEYV_INSTANCE',
       useFactory: (configService: ConfigService) => {
-        const redisUri = `redis://${configService.get<string>('config.redis.username')}:${configService.get<string>('config.redis.password')}@${configService.get<string>('config.redis.host')}:${configService.get<string>('config.redis.port')}`;
+        // Redis URI on Local
+        const redisUri = `redis://${configService.get<string>('config.redis.host')}:${configService.get<string>('config.redis.port')}`;
+
+        // Redis URI on Cloud
+        // const redisUri = `redis://${configService.get<string>('config.redis.username')}:${configService.get<string>('config.redis.password')}@${configService.get<string>('config.redis.host')}:${configService.get<string>('config.redis.port')}`;
 
         const keyvRedis = new KeyvRedis(redisUri);
         return new Keyv({ store: keyvRedis });

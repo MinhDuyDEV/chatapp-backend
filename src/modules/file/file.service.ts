@@ -1,23 +1,29 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import {
+  DeleteObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from '@aws-sdk/client-s3';
 import { File } from '@/entities/file.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { LessThan, Repository } from 'typeorm';
 import { v4 as uuid } from 'uuid';
 import { UploadFileDto, UploadFileResponseDto } from './dto/upload-file.dto';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class FileService {
   constructor(
     @InjectRepository(File)
     private readonly fileRepository: Repository<File>,
+    private readonly configService: ConfigService,
   ) {}
 
   private readonly s3Client = new S3Client({
-    region: process.env.AWS_S3_REGION,
+    region: this.configService.get('config.aws.s3.region'),
     credentials: {
-      accessKeyId: process.env.AWS_S3_ACCESS_KEY_ID,
-      secretAccessKey: process.env.AWS_S3_SECRET_ACCESS_KEY,
+      accessKeyId: this.configService.get('config.aws.s3.accessKeyId'),
+      secretAccessKey: this.configService.get('config.aws.s3.secretAccessKey'),
     },
   });
 
@@ -30,7 +36,7 @@ export class FileService {
 
     // Upload file to S3
     const putCommand = new PutObjectCommand({
-      Bucket: process.env.AWS_S3_BUCKET,
+      Bucket: this.configService.get('config.aws.s3.bucket'),
       Key: key,
       Body: file.buffer,
       ContentType: file.mimetype,
@@ -50,7 +56,7 @@ export class FileService {
       key,
       type,
       mimetype: file.mimetype,
-      url: `${process.env.CLOUDFRONT_URL}/${key}`,
+      url: `${this.configService.get('config.aws.cloudfront.url')}/${key}`,
     });
     if (!newFile) {
       throw new InternalServerErrorException('Error saving file to database');
@@ -70,5 +76,37 @@ export class FileService {
     const uploadPromises = files.map((file) => this.upload(file, data));
 
     return Promise.all(uploadPromises);
+  }
+
+  async deleteFileFromS3(key: string): Promise<void> {
+    const deleteCommand = new DeleteObjectCommand({
+      Bucket: this.configService.get('config.aws.s3.bucket'),
+      Key: key,
+    });
+
+    try {
+      await this.s3Client.send(deleteCommand);
+    } catch (error) {
+      console.log('Error deleting file from S3', error);
+      throw new InternalServerErrorException('Error deleting file from S3');
+    }
+  }
+
+  async cleanUpJunkFiles(): Promise<void> {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    const junkFiles = await this.fileRepository.find({
+      where: { post: null, createdAt: LessThan(yesterday) },
+    });
+
+    for (const file of junkFiles) {
+      try {
+        await this.deleteFileFromS3(file.key);
+        await this.fileRepository.remove(file);
+      } catch (error) {
+        console.log('Error cleaning up junk file', error);
+      }
+    }
   }
 }

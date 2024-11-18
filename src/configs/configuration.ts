@@ -30,4 +30,18 @@ export default registerAs('config', () => ({
   },
 
   apiKey: process.env.API_KEY || 'your-api-key',
+
+  aws: {
+    s3: {
+      bucket: process.env.AWS_S3_BUCKET || 'your-bucket',
+      region: process.env.AWS_S3_REGION || 'us-east-1',
+      accessKeyId: process.env.AWS_S3_ACCESS_KEY_ID || 'your-access-key-id',
+      secretAccessKey:
+        process.env.AWS_S3_SECRET_ACCESS_KEY || 'your-secret-access-key',
+    },
+    cloudfront: {
+      url: process.env.CLOUDFRONT_URL || 'your-cloudfront-url',
+      keyPairId: process.env.CLOUDFRONT_KEY_PAIR_ID || 'your-key-pair-id',
+    },
+  },
 }));

@@ -7,7 +7,7 @@ export class CreatePostDto {
   content: string;
 
   @IsNotEmpty()
-  visibility?: Visibility;
+  visibility: Visibility;
 
   @IsArray()
   fileIds?: BaseFileResponseDto[];
