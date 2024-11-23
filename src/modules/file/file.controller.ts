@@ -9,7 +9,11 @@ import {
 } from '@nestjs/common';
 import { FileService } from './file.service';
 import { JwtAccessTokenGuard } from '../auth/guards/jwt-access-token.guard';
-import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import {
+  AnyFilesInterceptor,
+  FileInterceptor,
+  FilesInterceptor,
+} from '@nestjs/platform-express';
 import { UploadFileDto, UploadFileResponseDto } from './dto/upload-file.dto';
 
 @UseGuards(JwtAccessTokenGuard)
@@ -33,5 +37,15 @@ export class FileController {
     @Body() data: UploadFileDto,
   ): Promise<UploadFileResponseDto[]> {
     return this.fileService.uploadMultiple(files, data);
+  }
+
+  @Post('upload-message')
+  @UseInterceptors(AnyFilesInterceptor())
+  async uploadFileMessage(
+    @UploadedFiles() files: Express.Multer.File[],
+    @Body() data: UploadFileDto,
+  ): Promise<UploadFileResponseDto[]> {
+    console.log('uploadFileMessage controller', { files, data });
+    return this.fileService.uploadFiles(files, data);
   }
 }
