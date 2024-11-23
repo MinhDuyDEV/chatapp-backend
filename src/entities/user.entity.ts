@@ -6,7 +6,6 @@ import { Like } from './like.entity';
 import { Comment } from './comment.entity';
 import { Share } from './share.entity';
 import { BaseEntity } from './base.entity';
-import { IsDateString } from 'class-validator';
 import { Group } from '@/entities/group.entity';
 import { Profile } from '@/entities/profile.entity';
 import { Peer } from '@/entities/peer.entity';
@@ -23,19 +22,6 @@ export class User extends BaseEntity {
 
   @Column({ unique: true })
   username: string;
-
-  @Column({ nullable: true })
-  firstName: string;
-
-  @Column({ nullable: true })
-  lastName: string;
-
-  @Column()
-  @IsDateString()
-  birthday: string;
-
-  @Column()
-  gender: string;
 
   @Column({ nullable: true })
   avatar: string;

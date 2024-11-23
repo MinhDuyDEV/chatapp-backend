@@ -1,5 +1,6 @@
 import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { User } from '@/entities/user.entity';
+import { IsDateString } from 'class-validator';
 
 @Entity()
 export class Profile {
@@ -7,14 +8,24 @@ export class Profile {
   id: string;
 
   @Column({ default: '' })
-  about?: string;
-
-  @Column({ nullable: true })
-  avatar?: string;
+  bio?: string;
 
   @Column({ nullable: true })
   banner?: string;
 
-  @OneToOne(() => User)
+  @Column({ nullable: true })
+  firstName: string;
+
+  @Column({ nullable: true })
+  lastName: string;
+
+  @Column()
+  @IsDateString()
+  birthday: string;
+
+  @Column()
+  gender: string;
+
+  @OneToOne(() => User, (user) => user.profile, { onDelete: 'CASCADE' })
   user: User;
 }

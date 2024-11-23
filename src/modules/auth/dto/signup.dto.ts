@@ -20,10 +20,6 @@ export class SignupDto {
   @Length(1, 50)
   username: string;
 
-  firstName?: string;
-
-  lastName?: string;
-
   @IsDateString()
   birthday: string;
 

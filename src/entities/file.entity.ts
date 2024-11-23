@@ -23,9 +23,6 @@ export class File extends BaseEntity {
   mimetype: string;
 
   @Column()
-  url: string;
-
-  @Column()
   @Exclude()
   name: string;
 

@@ -42,6 +42,7 @@ export default registerAs('config', () => ({
     cloudfront: {
       url: process.env.CLOUDFRONT_URL || 'your-cloudfront-url',
       keyPairId: process.env.CLOUDFRONT_KEY_PAIR_ID || 'your-key-pair-id',
+      privateKey: process.env.CLOUDFRONT_PRIVATE_KEY || 'your-private-key',
     },
   },
 }));

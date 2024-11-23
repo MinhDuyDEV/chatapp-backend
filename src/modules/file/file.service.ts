@@ -12,6 +12,7 @@ import { UploadFileDto, UploadFileResponseDto } from './dto/upload-file.dto';
 import { ConfigService } from '@nestjs/config';
 import { MessageAttachment } from '@/entities/message-attachment.entity';
 import { GroupMessageAttachment } from '@/entities/group-message-attachment.entity';
+import { getSignedUrl } from '@aws-sdk/cloudfront-signer';
 
 @Injectable()
 export class FileService {
@@ -86,9 +87,16 @@ export class FileService {
       throw new InternalServerErrorException('Error saving file to database');
     }
 
+    const signedUrl = getSignedUrl({
+      url: `${this.configService.get('config.aws.cloudfront.url')}/${key}`,
+      keyPairId: this.configService.get('config.aws.cloudfront.keyPairId'),
+      privateKey: this.configService.get('config.aws.cloudfront.privateKey'),
+      dateLessThan: (Math.floor(Date.now() / 1000) + 31536000).toString(), // expires in 1 year
+    });
+
     return {
       id: newFile.id,
-      url: newFile.url,
+      url: signedUrl,
       mimetype: newFile.mimetype,
     };
   }
