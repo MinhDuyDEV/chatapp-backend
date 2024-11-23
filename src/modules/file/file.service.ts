@@ -50,7 +50,7 @@ export class FileService {
 
     // Upload file to S3
     const putCommand = new PutObjectCommand({
-      Bucket: process.env.AWS_S3_BUCKET,
+      Bucket: this.configService.get('config.aws.s3.bucket'),
       Key: key,
       Body: file.buffer,
       ContentType: file.mimetype,
@@ -69,16 +69,16 @@ export class FileService {
         id: uuid(),
         name: file.originalname,
         key,
+        type,
         mimetype: file.mimetype,
-        url: `${process.env.CLOUDFRONT_URL}/${key}`,
       });
     } else if (type === 'group-message') {
       newFile = await this.groupMessageAttachmentRepository.save({
         id: uuid(),
         name: file.originalname,
         key,
+        type,
         mimetype: file.mimetype,
-        url: `${process.env.CLOUDFRONT_URL}/${key}`,
       });
     }
 
@@ -89,60 +89,8 @@ export class FileService {
     return {
       id: newFile.id,
       url: newFile.url,
-      name: newFile.name,
       mimetype: newFile.mimetype,
     };
-  }
-
-  async upload(
-    file: Express.Multer.File,
-    data: UploadFileDto,
-  ): Promise<UploadFileResponseDto> {
-    const { type } = data;
-    const key = `${Date.now().toString()}-${file.originalname}`;
-
-    // Upload file to S3
-    const putCommand = new PutObjectCommand({
-      Bucket: this.configService.get('config.aws.s3.bucket'),
-      Key: key,
-      Body: file.buffer,
-      ContentType: file.mimetype,
-    });
-
-    try {
-      await this.s3Client.send(putCommand);
-    } catch (error) {
-      console.log('Error uploading file to S3', error);
-      throw new InternalServerErrorException();
-    }
-
-    // Save file to database
-    const newFile = await this.fileRepository.save({
-      id: uuid(),
-      name: file.originalname,
-      key,
-      type,
-      mimetype: file.mimetype,
-      url: `${this.configService.get('config.aws.cloudfront.url')}/${key}`,
-    });
-    if (!newFile) {
-      throw new InternalServerErrorException('Error saving file to database');
-    }
-
-    return {
-      id: newFile.id,
-      url: newFile.url,
-      mimetype: newFile.mimetype,
-    };
-  }
-
-  async uploadMultiple(
-    files: Express.Multer.File[],
-    data: UploadFileDto,
-  ): Promise<UploadFileResponseDto[]> {
-    const uploadPromises = files.map((file) => this.upload(file, data));
-
-    return Promise.all(uploadPromises);
   }
 
   async deleteFileFromS3(key: string): Promise<void> {
