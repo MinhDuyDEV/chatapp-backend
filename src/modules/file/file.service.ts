@@ -10,8 +10,6 @@ import { LessThan, Repository } from 'typeorm';
 import { v4 as uuid } from 'uuid';
 import { UploadFileDto, UploadFileResponseDto } from './dto/upload-file.dto';
 import { ConfigService } from '@nestjs/config';
-import { MessageAttachment } from '@/entities/message-attachment.entity';
-import { GroupMessageAttachment } from '@/entities/group-message-attachment.entity';
 import { getSignedUrl } from '@aws-sdk/cloudfront-signer';
 
 @Injectable()
@@ -20,10 +18,6 @@ export class FileService {
     @InjectRepository(File)
     private readonly fileRepository: Repository<File>,
     private readonly configService: ConfigService,
-    @InjectRepository(MessageAttachment)
-    private readonly messageAttachmentRepository: Repository<MessageAttachment>,
-    @InjectRepository(GroupMessageAttachment)
-    private readonly groupMessageAttachmentRepository: Repository<GroupMessageAttachment>,
   ) {}
 
   private readonly s3Client = new S3Client({
@@ -38,11 +32,11 @@ export class FileService {
     files: Express.Multer.File[],
     data: UploadFileDto,
   ): Promise<UploadFileResponseDto[]> {
-    const uploadPromises = files.map((file) => this.uploadMessage(file, data));
+    const uploadPromises = files.map((file) => this.upload(file, data));
     return Promise.all(uploadPromises);
   }
 
-  private async uploadMessage(
+  private async upload(
     file: Express.Multer.File,
     data: UploadFileDto,
   ): Promise<UploadFileResponseDto> {
@@ -64,24 +58,13 @@ export class FileService {
       throw new InternalServerErrorException();
     }
 
-    let newFile;
-    if (type === 'message') {
-      newFile = await this.messageAttachmentRepository.save({
-        id: uuid(),
-        name: file.originalname,
-        key,
-        type,
-        mimetype: file.mimetype,
-      });
-    } else if (type === 'group-message') {
-      newFile = await this.groupMessageAttachmentRepository.save({
-        id: uuid(),
-        name: file.originalname,
-        key,
-        type,
-        mimetype: file.mimetype,
-      });
-    }
+    const newFile = await this.fileRepository.save({
+      id: uuid(),
+      name: file.originalname,
+      key,
+      type,
+      mimetype: file.mimetype,
+    });
 
     if (!newFile) {
       throw new InternalServerErrorException('Error saving file to database');
