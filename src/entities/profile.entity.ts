@@ -2,7 +2,7 @@ import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { User } from '@/entities/user.entity';
 import { IsDateString } from 'class-validator';
 
-@Entity()
+@Entity('profiles')
 export class Profile {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -11,7 +11,7 @@ export class Profile {
   bio?: string;
 
   @Column({ nullable: true })
-  banner?: string;
+  coverPhoto?: string;
 
   @Column({ nullable: true })
   firstName: string;

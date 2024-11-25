@@ -4,18 +4,18 @@ import { UpdatePostDto } from './dto/update-post.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Post } from '@/entities/post.entity';
 import { In, Repository } from 'typeorm';
-import { File } from '@/entities/file.entity';
 import { PostResponseDto } from './dto/post-response.dto';
 import { plainToInstance } from 'class-transformer';
 import { Comment } from '@/entities/comment.entity';
+import { PostAttachment } from '@/entities/post-attachment.entity';
 
 @Injectable()
 export class PostService {
   constructor(
     @InjectRepository(Post)
     private readonly postRepository: Repository<Post>,
-    @InjectRepository(File)
-    private readonly fileRepository: Repository<File>,
+    @InjectRepository(PostAttachment)
+    private readonly postAttachmentRepository: Repository<PostAttachment>,
     @InjectRepository(Comment)
     private readonly commentRepository: Repository<Comment>,
   ) {}
@@ -59,12 +59,12 @@ export class PostService {
     });
     const savedPost = await this.postRepository.save(post);
 
-    if (createPostDto.fileIds?.length > 0) {
-      const files = await this.fileRepository.findBy({
-        id: In(createPostDto.fileIds),
+    if (createPostDto.attachmentIds?.length > 0) {
+      const attachments = await this.postAttachmentRepository.findBy({
+        id: In(createPostDto.attachmentIds),
       });
-      files.forEach((file) => (file.post = savedPost));
-      await this.fileRepository.save(files);
+      attachments.forEach((attachment) => (attachment.post = savedPost));
+      await this.postAttachmentRepository.save(attachments);
     }
 
     return this.getPostById(savedPost.id, authorId);
@@ -73,7 +73,7 @@ export class PostService {
   async getAllPosts(currentUserId: string, page: number, limit: number) {
     const [posts, total] = await this.postRepository
       .createQueryBuilder('post')
-      .leftJoinAndSelect('post.files', 'file')
+      .leftJoinAndSelect('post.attachments', 'postAttachment')
       .leftJoinAndSelect('post.author', 'author')
       .leftJoinAndSelect('post.likes', 'like')
       .leftJoinAndSelect('like.user', 'user')
@@ -112,7 +112,7 @@ export class PostService {
   ): Promise<PostResponseDto> {
     const post = await this.postRepository
       .createQueryBuilder('post')
-      .leftJoinAndSelect('post.files', 'file')
+      .leftJoinAndSelect('post.attachments', 'postAttachment')
       .leftJoinAndSelect('post.author', 'author')
       .leftJoinAndSelect('post.likes', 'like')
       .leftJoinAndSelect('like.user', 'user')

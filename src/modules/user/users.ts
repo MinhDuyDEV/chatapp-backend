@@ -8,4 +8,5 @@ export interface IUserService {
   saveRefreshToken(token: string, userId: string): Promise<any>;
   createUser(params: CreateUserParams): Promise<User>;
   deleteRefreshToken(userId: string): Promise<any>;
+  uploadAvatar(userId: string, file: Express.Multer.File): Promise<User>;
 }

@@ -25,7 +25,7 @@ export class PostResponseDto {
 
   @Expose()
   @Type(() => BaseFileResponseDto)
-  files: BaseFileResponseDto[];
+  attachments: BaseFileResponseDto[];
 
   @Expose()
   @Type(() => LikePostResponseDto)

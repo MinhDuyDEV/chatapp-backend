@@ -6,9 +6,10 @@ import { User } from '@/entities/user.entity';
 import { UserService } from './user.service';
 import { UserController } from './user.controller';
 import { Services } from '@/shared/constants/services.enum';
+import { FileModule } from '../file/file.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User])],
+  imports: [TypeOrmModule.forFeature([User]), FileModule],
   controllers: [UserController],
   providers: [
     {

@@ -2,7 +2,6 @@ import { User } from './user.entity';
 import { Message } from './message.entity';
 import { Conversation } from './conversation.entity';
 import { Post } from './post.entity';
-import { File } from './file.entity';
 import { Like } from './like.entity';
 import { Comment } from './comment.entity';
 import { Share } from './share.entity';
@@ -15,13 +14,14 @@ import { FriendRequest } from './user-request.entity';
 import { Profile } from '@/entities/profile.entity';
 import { Peer } from '@/entities/peer.entity';
 import { UserPresence } from '@/entities/user-presence.entity';
+import { PostAttachment } from './post-attachment.entity';
+import { AvatarAttachment } from './avatar-attachment.entity';
 
 const entities = [
   User,
   Conversation,
   Message,
   Post,
-  File,
   Like,
   Comment,
   Share,
@@ -36,8 +36,20 @@ const entities = [
   Profile,
   Peer,
   UserPresence,
+  PostAttachment,
+  AvatarAttachment,
 ];
 
-export { User, Conversation, Message, Post, File, Like, Comment, Share };
+export {
+  User,
+  Conversation,
+  Message,
+  Post,
+  Like,
+  Comment,
+  Share,
+  PostAttachment,
+  AvatarAttachment,
+};
 
 export default entities;

@@ -4,20 +4,29 @@ import {
   PutObjectCommand,
   S3Client,
 } from '@aws-sdk/client-s3';
-import { File } from '@/entities/file.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { LessThan, Repository } from 'typeorm';
 import { v4 as uuid } from 'uuid';
 import { UploadFileDto, UploadFileResponseDto } from './dto/upload-file.dto';
 import { ConfigService } from '@nestjs/config';
-import { getSignedUrl } from '@aws-sdk/cloudfront-signer';
+import { MessageAttachment } from '@/entities/message-attachment.entity';
+import { GroupMessageAttachment } from '@/entities/group-message-attachment.entity';
+import { PostAttachment } from '@/entities/post-attachment.entity';
+import { AvatarAttachment } from '@/entities/avatar-attachment.entity';
+import { FileType } from '@/shared/constants/file-type';
 
 @Injectable()
 export class FileService {
   constructor(
-    @InjectRepository(File)
-    private readonly fileRepository: Repository<File>,
     private readonly configService: ConfigService,
+    @InjectRepository(PostAttachment)
+    private readonly postAttachmentRepository: Repository<PostAttachment>,
+    @InjectRepository(MessageAttachment)
+    private readonly messageAttachmentRepository: Repository<MessageAttachment>,
+    @InjectRepository(GroupMessageAttachment)
+    private readonly groupMessageAttachmentRepository: Repository<GroupMessageAttachment>,
+    @InjectRepository(AvatarAttachment)
+    private readonly avatarAttachmentRepository: Repository<AvatarAttachment>,
   ) {}
 
   private readonly s3Client = new S3Client({
@@ -58,28 +67,55 @@ export class FileService {
       throw new InternalServerErrorException();
     }
 
-    const newFile = await this.fileRepository.save({
-      id: uuid(),
-      name: file.originalname,
-      key,
-      type,
-      mimetype: file.mimetype,
-    });
+    let newFile;
+    switch (type) {
+      case FileType.MESSAGE:
+        newFile = await this.messageAttachmentRepository.save({
+          id: uuid(),
+          name: file.originalname,
+          key,
+          url: `${this.configService.get('config.aws.cloudfront.url')}/${key}`,
+          mimetype: file.mimetype,
+        });
+        break;
+      case FileType.GROUP_MESSAGE:
+        newFile = await this.groupMessageAttachmentRepository.save({
+          id: uuid(),
+          name: file.originalname,
+          key,
+          url: `${this.configService.get('config.aws.cloudfront.url')}/${key}`,
+          mimetype: file.mimetype,
+        });
+        break;
+      case FileType.POST:
+        newFile = await this.postAttachmentRepository.save({
+          id: uuid(),
+          name: file.originalname,
+          key,
+          url: `${this.configService.get('config.aws.cloudfront.url')}/${key}`,
+          mimetype: file.mimetype,
+        });
+        break;
+      case FileType.AVATAR:
+        newFile = await this.avatarAttachmentRepository.save({
+          id: uuid(),
+          name: file.originalname,
+          key,
+          url: `${this.configService.get('config.aws.cloudfront.url')}/${key}`,
+          mimetype: file.mimetype,
+        });
+        break;
+      default:
+        throw new InternalServerErrorException('Invalid file type');
+    }
 
     if (!newFile) {
       throw new InternalServerErrorException('Error saving file to database');
     }
 
-    const signedUrl = getSignedUrl({
-      url: `${this.configService.get('config.aws.cloudfront.url')}/${key}`,
-      keyPairId: this.configService.get('config.aws.cloudfront.keyPairId'),
-      privateKey: this.configService.get('config.aws.cloudfront.privateKey'),
-      dateLessThan: (Math.floor(Date.now() / 1000) + 31536000).toString(), // expires in 1 year
-    });
-
     return {
       id: newFile.id,
-      url: signedUrl,
+      url: newFile.url,
       mimetype: newFile.mimetype,
     };
   }
@@ -102,14 +138,14 @@ export class FileService {
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
 
-    const junkFiles = await this.fileRepository.find({
+    const junkFiles = await this.postAttachmentRepository.find({
       where: { post: null, createdAt: LessThan(yesterday) },
     });
 
     for (const file of junkFiles) {
       try {
         await this.deleteFileFromS3(file.key);
-        await this.fileRepository.remove(file);
+        await this.postAttachmentRepository.remove(file);
       } catch (error) {
         console.log('Error cleaning up junk file', error);
       }

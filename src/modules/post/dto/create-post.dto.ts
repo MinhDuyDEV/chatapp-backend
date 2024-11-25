@@ -10,5 +10,5 @@ export class CreatePostDto {
   visibility: Visibility;
 
   @IsArray()
-  fileIds?: BaseFileResponseDto[];
+  attachmentIds?: BaseFileResponseDto[];
 }

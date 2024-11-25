@@ -10,6 +10,7 @@ import { Group } from '@/entities/group.entity';
 import { Profile } from '@/entities/profile.entity';
 import { Peer } from '@/entities/peer.entity';
 import { UserPresence } from '@/entities/user-presence.entity';
+import { AvatarAttachment } from './avatar-attachment.entity';
 
 @Entity('users')
 export class User extends BaseEntity {
@@ -24,6 +25,7 @@ export class User extends BaseEntity {
   username: string;
 
   @Column({ nullable: true })
+  @OneToOne(() => AvatarAttachment, (avatarAttachment) => avatarAttachment.user)
   avatar: string;
 
   @Column({ nullable: true })
