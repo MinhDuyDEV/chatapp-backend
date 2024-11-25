@@ -1,7 +1,26 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsArray, IsOptional, IsString } from 'class-validator';
 
 export class CreateMessageDto {
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
-  content: string;
+  content?: string;
+
+  @IsOptional()
+  @IsArray()
+  attachments?: AttachmentDto[];
+}
+
+export class AttachmentDto {
+  @IsString()
+  id: string;
+
+  @IsString()
+  url: string;
+
+  @IsString()
+  mimetype: string;
+
+  @IsOptional()
+  @IsString()
+  name?: string;
 }

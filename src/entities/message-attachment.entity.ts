@@ -1,13 +1,23 @@
-import { Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToOne } from 'typeorm';
 import { Message } from '@/entities/message.entity';
+import { BaseEntity } from '@/entities/base.entity';
+import { Exclude } from 'class-transformer';
 
 @Entity({ name: 'message_attachments' })
-export class MessageAttachment {
-  @PrimaryGeneratedColumn('uuid')
+export class MessageAttachment extends BaseEntity {
+  @Column()
+  @Exclude()
   key: string;
 
-  @ManyToOne(() => Message, (message) => message.attachments, {
-    onDelete: 'CASCADE',
-  })
+  @Column()
+  mimetype: string;
+
+  @Column()
+  url: string;
+
+  @Column()
+  name: string;
+
+  @ManyToOne(() => Message, (message) => message.attachments)
   message: Message;
 }

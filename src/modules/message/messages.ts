@@ -10,6 +10,7 @@ export interface IMessageService {
     content,
     conversationId,
     user,
+    attachments,
   }: CreateMessageParams): Promise<any>;
   createLastMessage(
     conversationId: string,

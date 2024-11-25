@@ -32,12 +32,13 @@ export class MessageController {
   async createMessage(
     @AuthUser() user: User,
     @Param('conversationId') conversationId: string,
-    @Body() { content }: CreateMessageDto,
+    @Body() { content, attachments }: CreateMessageDto,
   ): Promise<void> {
     const response = await this.messageService.createMessage({
       user,
       content,
       conversationId,
+      attachments,
     });
     this.eventEmitter.emit('message.create', response);
     return;

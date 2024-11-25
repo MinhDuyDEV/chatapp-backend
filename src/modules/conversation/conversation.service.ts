@@ -33,6 +33,7 @@ export class ConversationService implements IConversationsService {
       .leftJoinAndSelect('conversation.creator', 'creator')
       .leftJoinAndSelect('conversation.recipient', 'recipient')
       .leftJoinAndSelect('conversation.lastMessageSent', 'lastMessageSent')
+      .leftJoinAndSelect('lastMessageSent.attachments', 'attachments')
       .where('creator.id = :id', { id })
       .orWhere('recipient.id = :id', { id })
       .orderBy('lastMessageSent.createdAt', 'DESC')

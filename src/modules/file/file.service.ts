@@ -58,7 +58,9 @@ export class FileService {
     }
 
     let newFile;
+    console.log('type', type);
     if (type === 'message') {
+      console.log('inside message');
       newFile = await this.messageAttachmentRepository.save({
         id: uuid(),
         name: file.originalname,
@@ -67,6 +69,7 @@ export class FileService {
         url: `${process.env.CLOUDFRONT_URL}/${key}`,
       });
     } else if (type === 'group-message') {
+      console.log('inside group-message');
       newFile = await this.groupMessageAttachmentRepository.save({
         id: uuid(),
         name: file.originalname,

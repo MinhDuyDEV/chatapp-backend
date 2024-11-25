@@ -7,10 +7,11 @@ import { MessageService } from './message.service';
 import { MessageController } from './message.controller';
 import { EventsModule } from '@/modules/events/events.module';
 import { Services } from '@/shared/constants/services.enum';
+import { MessageAttachment } from '@/entities/message-attachment.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Message]),
+    TypeOrmModule.forFeature([Message, MessageAttachment]),
     forwardRef(() => ConversationModule),
     EventsModule,
   ],
