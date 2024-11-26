@@ -116,6 +116,7 @@ export class FileService {
     return {
       id: newFile.id,
       url: newFile.url,
+      name: newFile.name,
       mimetype: newFile.mimetype,
     };
   }
