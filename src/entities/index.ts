@@ -54,6 +54,10 @@ export {
   Share,
   PostAttachment,
   AvatarAttachment,
+  Notification,
+  Follow,
+  Friend,
+  FriendRequest,
 };
 
 export default entities;

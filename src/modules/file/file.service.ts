@@ -45,7 +45,7 @@ export class FileService {
     return Promise.all(uploadPromises);
   }
 
-  private async upload(
+  async upload(
     file: Express.Multer.File,
     data: UploadFileDto,
   ): Promise<UploadFileResponseDto> {

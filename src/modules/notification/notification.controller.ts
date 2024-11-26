@@ -1,11 +1,23 @@
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
-import { NotificationService } from './notification.service';
+import {
+  Body,
+  Controller,
+  Get,
+  Inject,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import { User } from '@/entities/user.entity';
 import { AuthUser } from '@/shared/decorators/auth-user.decorator';
+import { INotificationService } from './notifications';
+import { Services } from '@/shared/constants/services.enum';
 
 @Controller('notification')
 export class NotificationController {
-  constructor(private readonly notificationService: NotificationService) {}
+  constructor(
+    @Inject(Services.NOTIFICATIONS)
+    private readonly notificationService: INotificationService,
+  ) {}
 
   @Post()
   async createNotification(
