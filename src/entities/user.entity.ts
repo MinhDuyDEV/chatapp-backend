@@ -11,6 +11,8 @@ import { Profile } from '@/entities/profile.entity';
 import { Peer } from '@/entities/peer.entity';
 import { UserPresence } from '@/entities/user-presence.entity';
 import { AvatarAttachment } from './avatar-attachment.entity';
+import { Follow } from '@/entities/follow.entity';
+import { Notification } from '@/entities/notification.entity';
 
 @Entity('users')
 export class User extends BaseEntity {
@@ -60,4 +62,13 @@ export class User extends BaseEntity {
     cascade: ['insert', 'remove', 'update'],
   })
   peer: Peer;
+
+  @OneToMany(() => Follow, (follow) => follow.follower)
+  followers: Follow[];
+
+  @OneToMany(() => Follow, (follow) => follow.following)
+  following: Follow[];
+
+  @OneToMany(() => Notification, (notification) => notification.user)
+  notifications: Notification[];
 }

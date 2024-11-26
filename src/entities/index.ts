@@ -10,12 +10,14 @@ import { GroupMessage } from '@/entities/group-message.entity';
 import { GroupMessageAttachment } from '@/entities/group-message-attachment.entity';
 import { MessageAttachment } from '@/entities/message-attachment.entity';
 import { Friend } from './friend.entity';
-import { FriendRequest } from './user-request.entity';
+import { FriendRequest } from './friend-request.entity';
 import { Profile } from '@/entities/profile.entity';
 import { Peer } from '@/entities/peer.entity';
 import { UserPresence } from '@/entities/user-presence.entity';
 import { PostAttachment } from './post-attachment.entity';
 import { AvatarAttachment } from './avatar-attachment.entity';
+import { Follow } from '@/entities/follow.entity';
+import { Notification } from '@/entities/notification.entity';
 
 const entities = [
   User,
@@ -33,6 +35,8 @@ const entities = [
   GroupMessageAttachment,
   Friend,
   FriendRequest,
+  Follow,
+  Notification,
   Profile,
   Peer,
   UserPresence,

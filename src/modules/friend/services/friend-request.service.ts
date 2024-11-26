@@ -3,7 +3,7 @@ import { IFriendRequestService } from '@/modules/friend/interfaces/friend-reques
 import { InjectRepository } from '@nestjs/typeorm';
 import { Friend } from '@/entities/friend.entity';
 import { Repository } from 'typeorm';
-import { FriendRequest } from '@/entities/user-request.entity';
+import { FriendRequest } from '@/entities/friend-request.entity';
 import { Services } from '@/shared/constants/services.enum';
 import { IFriendsService } from '@/modules/friend/interfaces/friends';
 import { IUserService } from '@/modules/user/users';
@@ -40,7 +40,14 @@ export class FriendRequestService implements IFriendRequestService {
   }
 
   getFriendRequests(userId: string): Promise<FriendRequest[]> {
-    return Promise.resolve([]);
+    const status = 'pending';
+    return this.friendRequestRepository.find({
+      where: [
+        { sender: { id: userId }, status },
+        { receiver: { id: userId }, status },
+      ],
+      relations: ['sender', 'receiver', 'receiver.profile', 'sender.profile'],
+    });
   }
 
   isPending(userOneId: string, userTwoId: string) {}
