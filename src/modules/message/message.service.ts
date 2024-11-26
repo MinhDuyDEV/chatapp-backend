@@ -17,12 +17,16 @@ import { EditMessageParams } from '@/modules/message/types/edit-message-params.t
 import { IMessageService } from '@/modules/message/messages';
 import { Services } from '@/shared/constants/services.enum';
 import { IConversationsService } from '@/modules/conversation/conversations';
+import { MessageAttachment } from '@/entities/message-attachment.entity';
+import { AttachmentDto } from '@/modules/message/dto/create-message.dto';
 
 @Injectable()
 export class MessageService implements IMessageService {
   constructor(
     @InjectRepository(Message)
     private readonly messageRepository: Repository<Message>,
+    @InjectRepository(MessageAttachment)
+    private readonly messageAttachmentRepository: Repository<MessageAttachment>,
     @Inject(forwardRef(() => Services.CONVERSATIONS))
     private readonly conversationService: IConversationsService,
   ) {}
@@ -31,6 +35,7 @@ export class MessageService implements IMessageService {
     content,
     conversationId,
     user,
+    attachments,
   }: CreateMessageParams): Promise<any> {
     const existedConversation =
       await this.conversationService.findConversationById(conversationId);
@@ -41,18 +46,95 @@ export class MessageService implements IMessageService {
     if (creator.id !== user.id && recipient.id !== user.id)
       throw new ForbiddenException('Cannot Create Message');
 
-    const newMessage = this.messageRepository.create({
-      content,
-      conversation: existedConversation,
-      author: user,
-    });
-    const savedMessage = await this.messageRepository.save(newMessage);
+    const messages = [];
+
+    if (content) {
+      const contentMessage = await this.createContentMessage(
+        content,
+        existedConversation,
+        user,
+      );
+      messages.push(contentMessage);
+    }
+
+    if (attachments && attachments.length > 0) {
+      const attachmentMessages = await this.createAttachmentMessages(
+        attachments,
+        existedConversation,
+        user,
+      );
+      messages.push(...attachmentMessages);
+    }
+
     const savedConversation =
       await this.conversationService.updateLastMessageSent(
         conversationId,
-        savedMessage,
+        messages[messages.length - 1],
       );
-    return { message: savedMessage, conversation: savedConversation };
+
+    return { messages, conversation: savedConversation };
+  }
+
+  private async createContentMessage(
+    content: string,
+    conversation: Conversation,
+    user: User,
+  ): Promise<Message> {
+    const newMessage = this.messageRepository.create({
+      content,
+      conversation,
+      author: user,
+      attachments: [],
+    });
+    return await this.messageRepository.save(newMessage);
+  }
+
+  private async createAttachmentMessages(
+    attachments: AttachmentDto[],
+    conversation: Conversation,
+    user: User,
+  ): Promise<Message[]> {
+    const messages = [];
+    const imageAttachments = [];
+
+    for (const attachment of attachments) {
+      const existingAttachment = await this.messageAttachmentRepository.findOne(
+        { where: { id: attachment.id } },
+      );
+      if (!existingAttachment)
+        throw new ConflictException(
+          `Attachment with id ${attachment.id} not found`,
+        );
+
+      if (existingAttachment.mimetype.includes('image')) {
+        imageAttachments.push(existingAttachment);
+      } else if (
+        existingAttachment.mimetype.includes('video') ||
+        existingAttachment.mimetype.includes('application')
+      ) {
+        const newMessage = this.messageRepository.create({
+          content: '',
+          conversation,
+          author: user,
+          attachments: [existingAttachment],
+        });
+        const savedMessage = await this.messageRepository.save(newMessage);
+        messages.push(savedMessage);
+      }
+    }
+
+    if (imageAttachments.length > 0) {
+      const newMessage = this.messageRepository.create({
+        content: '',
+        conversation,
+        author: user,
+        attachments: imageAttachments,
+      });
+      const savedMessage = await this.messageRepository.save(newMessage);
+      messages.push(savedMessage);
+    }
+
+    return messages;
   }
 
   async createLastMessage(
@@ -84,7 +166,7 @@ export class MessageService implements IMessageService {
       throw new ForbiddenException('Cannot Get Messages');
 
     return await this.messageRepository.find({
-      relations: ['author'],
+      relations: ['author', 'attachments'],
       where: { conversation: { id } },
       order: { createdAt: 'ASC' },
     });

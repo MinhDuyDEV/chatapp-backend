@@ -1,4 +1,9 @@
-import { Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateGroupParamsType } from '@/modules/group/types/create-group-params.type';
 import { IUserService } from '@/modules/user/users';
 import { Services } from '@/shared/constants/services.enum';
@@ -7,6 +12,10 @@ import { Group } from '@/entities/group.entity';
 import { Repository } from 'typeorm';
 import { IGroupService } from '@/modules/group/interfaces/groups';
 import { FetchGroupsParams } from '@/modules/group/types/fetch-groups-params.type';
+import { User } from '@/entities/user.entity';
+import { AccessParams } from '@/modules/group/types/access-params.type';
+import { TransferOwnerParams } from '@/modules/group/types/transfer-owner-params.type';
+import { UpdateGroupDetailsParams } from '@/modules/group/types/update-group-details-params.type';
 
 @Injectable()
 export class GroupService implements IGroupService {
@@ -50,6 +59,50 @@ export class GroupService implements IGroupService {
   }
 
   saveGroup(group: Group): Promise<Group> {
+    return this.groupRepository.save(group);
+  }
+
+  async hasAccess({
+    groupId,
+    userId,
+  }: AccessParams): Promise<User | undefined> {
+    const group = await this.findGroupById(groupId);
+    if (group) throw new NotFoundException('Group not found');
+    return group.users.find((user) => user.id === userId);
+  }
+
+  async transferGroupOwner({
+    groupId,
+    userId,
+    newOwnerId,
+  }: TransferOwnerParams): Promise<Group> {
+    const group = await this.findGroupById(groupId);
+    if (!group) throw new NotFoundException('Group not found');
+    if (group.owner.id !== userId)
+      throw new BadRequestException('Insufficient Permissions');
+    if (group.owner.id === newOwnerId)
+      throw new BadRequestException('Cannot Transfer Owner to yourself');
+
+    const newOwner = await this.userService.findUser({ id: newOwnerId });
+    if (!newOwner) throw new NotFoundException('User not found');
+
+    group.owner = newOwner;
+
+    return this.groupRepository.save(group);
+  }
+
+  async updateDetails({
+    groupId,
+    title,
+    avatar,
+  }: UpdateGroupDetailsParams): Promise<Group> {
+    const group = await this.findGroupById(groupId);
+    if (!group) throw new NotFoundException('Group not found');
+    if (avatar) {
+      //   update avatar
+    }
+    group.title = title || group.title;
+
     return this.groupRepository.save(group);
   }
 }

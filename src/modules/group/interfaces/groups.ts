@@ -11,7 +11,7 @@ export interface IGroupService {
   getGroups(params: FetchGroupsParams): Promise<Group[]>;
   findGroupById(id: string): Promise<Group>;
   saveGroup(group: Group): Promise<Group>;
-  // hasAccess(params: AccessParams): Promise<User | undefined>;
-  // transferGroupOwner(params: TransferOwnerParams): Promise<Group>;
-  // updateDetails(params: UpdateGroupDetailsParams): Promise<Group>;
+  hasAccess(params: AccessParams): Promise<User | undefined>;
+  transferGroupOwner(params: TransferOwnerParams): Promise<Group>;
+  updateDetails(params: UpdateGroupDetailsParams): Promise<Group>;
 }

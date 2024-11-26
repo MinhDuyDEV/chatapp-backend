@@ -124,11 +124,11 @@ export class EventsGateway
     const userIds = Array.from(usersInSocket.keys());
     Logger.log('message.create event', JSON.stringify(userIds));
 
-    const { message, conversation } = payload;
+    const { messages, conversation } = payload;
 
-    const authorSocket = this.sessions.getUserSocket(message.author.id);
+    const authorSocket = this.sessions.getUserSocket(messages[0].author.id);
     const recipientSocket =
-      message.author.id === conversation.creator.id
+      messages[0].author.id === conversation.creator.id
         ? this.sessions.getUserSocket(conversation.recipient.id)
         : this.sessions.getUserSocket(conversation.creator.id);
 
@@ -184,7 +184,9 @@ export class EventsGateway
     Logger.log('group.create event');
     payload.users.forEach((user) => {
       const socket = this.sessions.getUserSocket(user.id);
-      socket && socket.emit('onGroupCreate', payload);
+      if (socket) {
+        socket.emit('onGroupCreate', payload);
+      }
     });
   }
 
@@ -230,7 +232,9 @@ export class EventsGateway
     this.server
       .to(`group-${payload.group.id}`)
       .emit('onGroupReceivedNewUser', payload);
-    recipientSocket && recipientSocket.emit('onGroupUserAdd', payload);
+    if (recipientSocket) {
+      recipientSocket.emit('onGroupUserAdd', payload);
+    }
   }
 
   @OnEvent('group.user.leave')

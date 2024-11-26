@@ -10,9 +10,13 @@ import { GroupMessageController } from '@/modules/group/controller/group-message
 import { GroupMessageService } from '@/modules/group/services/group-messages.service';
 import { GroupRecipientService } from '@/modules/group/services/group-recipient.service';
 import { GroupRecipientsController } from '@/modules/group/controller/group-recipients.controller';
+import { GroupMessageAttachment } from '@/entities/group-message-attachment.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Group, GroupMessage]), UserModule],
+  imports: [
+    TypeOrmModule.forFeature([Group, GroupMessage, GroupMessageAttachment]),
+    UserModule,
+  ],
   controllers: [
     GroupController,
     GroupMessageController,

@@ -19,7 +19,7 @@ export class MessageResponse {
 
 export class CreateMessageResponse {
   @Expose()
-  message: MessageResponse;
+  messages: MessageResponse[];
 
   @Expose()
   conversation: Conversation;

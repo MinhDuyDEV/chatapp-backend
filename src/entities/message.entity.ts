@@ -8,7 +8,9 @@ export class Message extends BaseMessage {
   @ManyToOne(() => Conversation, (conversation) => conversation.messages)
   conversation: Conversation;
 
-  @OneToMany(() => MessageAttachment, (attachment) => attachment.message)
+  @OneToMany(() => MessageAttachment, (attachment) => attachment.message, {
+    cascade: true,
+  })
   @JoinColumn()
   attachments: MessageAttachment[];
 }

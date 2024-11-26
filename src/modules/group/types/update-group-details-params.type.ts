@@ -1,7 +1,7 @@
 export interface Attachment extends Express.Multer.File {}
 
 export type UpdateGroupDetailsParams = {
-  id: number;
+  groupId: string;
   title?: string;
   avatar?: Attachment;
 };

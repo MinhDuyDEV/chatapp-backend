@@ -1,9 +1,9 @@
-import { Attachment } from '@/modules/group/types/update-group-details-params.type';
 import { User } from '@/entities/user.entity';
+import { AttachmentDto } from '@/modules/message/dto/create-message.dto';
 
 export type CreateGroupMessageParams = {
   author: User;
-  attachments?: Attachment[];
+  attachments?: AttachmentDto[];
   content: string;
   groupId: string;
 };
