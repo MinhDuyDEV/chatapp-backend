@@ -1,5 +1,12 @@
 import { Exclude } from 'class-transformer';
-import { Entity, Column, OneToMany, ManyToMany, OneToOne } from 'typeorm';
+import {
+  Entity,
+  Column,
+  OneToMany,
+  ManyToMany,
+  OneToOne,
+  JoinColumn,
+} from 'typeorm';
 import { Message } from './message.entity';
 import { Post } from './post.entity';
 import { Like } from './like.entity';
@@ -53,6 +60,7 @@ export class User extends BaseEntity {
   shares: Share[];
 
   @OneToOne(() => Profile, { cascade: ['insert', 'update'] })
+  @JoinColumn()
   profile: Profile;
 
   @OneToOne(() => UserPresence, { cascade: ['insert', 'update'] })

@@ -4,7 +4,6 @@ import {
   Controller,
   Get,
   Inject,
-  Param,
   Post,
   UploadedFile,
   UseInterceptors,
@@ -16,6 +15,12 @@ import { User } from '@/entities/user.entity';
 import { Services } from '@/shared/constants/services.enum';
 import { IUserService } from '@/modules/user/users';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { AuthUser } from '@/shared/decorators/auth-user.decorator';
+import {
+  UserAvatarResponseDto,
+  UserCoverPhotoResponseDto,
+} from './dto/user-photo-response.dto';
+import { UserProfileResponseDto } from './dto/user-profile-response.dto';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller(ROUTES.USERS)
@@ -29,15 +34,34 @@ export class UserController {
     return await this.userService.findAllUsers();
   }
 
-  @Post(':id/upload-avatar')
+  @Post('upload-avatar')
   @UseInterceptors(FileInterceptor('file'))
   async uploadAvatar(
-    @Param('id') userId: string,
+    @AuthUser() user: User,
     @UploadedFile() file: Express.Multer.File,
-  ): Promise<User> {
+  ): Promise<UserAvatarResponseDto> {
     if (!file) {
       throw new BadRequestException('No file provided');
     }
-    return await this.userService.uploadAvatar(userId, file);
+    return await this.userService.uploadAvatar(user.id, file);
+  }
+
+  @Post('upload-coverPhoto')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadCoverPhoto(
+    @AuthUser() user: User,
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<UserCoverPhotoResponseDto> {
+    if (!file) {
+      throw new BadRequestException('No file provided');
+    }
+    return await this.userService.uploadCoverPhoto(user.id, file);
+  }
+
+  @Get('profile')
+  async getUserProfile(
+    @AuthUser() user: User,
+  ): Promise<UserProfileResponseDto> {
+    return await this.userService.getUserProfile(user.id);
   }
 }

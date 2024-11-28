@@ -14,6 +14,7 @@ import { GroupMessageAttachment } from '@/entities/group-message-attachment.enti
 import { PostAttachment } from '@/entities/post-attachment.entity';
 import { AvatarAttachment } from '@/entities/avatar-attachment.entity';
 import { FileType } from '@/shared/constants/file-type';
+import { CoverPhotoAttachment } from '@/entities/cover-photo-attachment.entity';
 
 @Injectable()
 export class FileService {
@@ -27,6 +28,8 @@ export class FileService {
     private readonly groupMessageAttachmentRepository: Repository<GroupMessageAttachment>,
     @InjectRepository(AvatarAttachment)
     private readonly avatarAttachmentRepository: Repository<AvatarAttachment>,
+    @InjectRepository(CoverPhotoAttachment)
+    private readonly coverPhotoAttachmentRepository: Repository<CoverPhotoAttachment>,
   ) {}
 
   private readonly s3Client = new S3Client({
@@ -98,6 +101,15 @@ export class FileService {
         break;
       case FileType.AVATAR:
         newFile = await this.avatarAttachmentRepository.save({
+          id: uuid(),
+          name: file.originalname,
+          key,
+          url: `${this.configService.get('config.aws.cloudfront.url')}/${key}`,
+          mimetype: file.mimetype,
+        });
+        break;
+      case FileType.COVER_PHOTO:
+        newFile = await this.coverPhotoAttachmentRepository.save({
           id: uuid(),
           name: file.originalname,
           key,

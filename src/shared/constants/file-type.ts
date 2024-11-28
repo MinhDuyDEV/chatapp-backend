@@ -3,4 +3,5 @@ export enum FileType {
   MESSAGE = 'message',
   GROUP_MESSAGE = 'group-message',
   POST = 'post',
+  COVER_PHOTO = 'cover-photo',
 }

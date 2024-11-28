@@ -18,6 +18,7 @@ import { PostAttachment } from './post-attachment.entity';
 import { AvatarAttachment } from './avatar-attachment.entity';
 import { Follow } from '@/entities/follow.entity';
 import { Notification } from '@/entities/notification.entity';
+import { CoverPhotoAttachment } from './cover-photo-attachment.entity';
 
 const entities = [
   User,
@@ -42,6 +43,7 @@ const entities = [
   UserPresence,
   PostAttachment,
   AvatarAttachment,
+  CoverPhotoAttachment,
 ];
 
 export {
@@ -58,6 +60,7 @@ export {
   Follow,
   Friend,
   FriendRequest,
+  CoverPhotoAttachment,
 };
 
 export default entities;

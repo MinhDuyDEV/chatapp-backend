@@ -5,9 +5,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Post } from '@/entities/post.entity';
 import { In, Repository } from 'typeorm';
 import { PostResponseDto } from './dto/post-response.dto';
-import { plainToInstance } from 'class-transformer';
 import { Comment } from '@/entities/comment.entity';
 import { PostAttachment } from '@/entities/post-attachment.entity';
+import { DtoHelper } from '@/shared/utils/dto-helper';
 
 @Injectable()
 export class PostService {
@@ -24,28 +24,22 @@ export class PostService {
     post: Post,
     currentUserId: string,
   ): PostResponseDto {
-    const postResponse = plainToInstance(PostResponseDto, post, {
-      excludeExtraneousValues: true,
-    });
+    const postData = {
+      ...post,
+      likes:
+        post.likes && post.likes.length > 0
+          ? [
+              {
+                username: post.likes[0].user.username,
+              },
+            ]
+          : [],
+      remainingLikeCount: post.likes?.length > 0 ? post.likes.length - 1 : 0,
+      isLikedByCurrentUser:
+        post.likes?.some((like) => like.user.id === currentUserId) || false,
+    };
 
-    if (post.likes && post.likes.length > 0) {
-      const [firstLike, ...remainingLikes] = post.likes;
-      postResponse.likes = [
-        {
-          username: firstLike.user.username,
-        },
-      ];
-      postResponse.remainingLikeCount = remainingLikes.length;
-      postResponse.isLikedByCurrentUser = post.likes.some(
-        (like) => like.user.id === currentUserId,
-      );
-    } else {
-      postResponse.likes = [];
-      postResponse.remainingLikeCount = 0;
-      postResponse.isLikedByCurrentUser = false;
-    }
-
-    return postResponse;
+    return DtoHelper.mapToDto(PostResponseDto, postData);
   }
 
   // Create a new post

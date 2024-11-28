@@ -6,6 +6,7 @@ import { MessageAttachment } from '@/entities/message-attachment.entity';
 import { GroupMessageAttachment } from '@/entities/group-message-attachment.entity';
 import { PostAttachment } from '@/entities/post-attachment.entity';
 import { AvatarAttachment } from '@/entities/avatar-attachment.entity';
+import { CoverPhotoAttachment } from '@/entities/cover-photo-attachment.entity';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { AvatarAttachment } from '@/entities/avatar-attachment.entity';
       MessageAttachment,
       GroupMessageAttachment,
       AvatarAttachment,
+      CoverPhotoAttachment,
     ]),
   ],
   controllers: [FileController],
