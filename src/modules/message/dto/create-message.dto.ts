@@ -6,6 +6,10 @@ export class CreateMessageDto {
   content?: string;
 
   @IsOptional()
+  @IsString()
+  parentMessageId?: string;
+
+  @IsOptional()
   @IsArray()
   attachments?: AttachmentDto[];
 }

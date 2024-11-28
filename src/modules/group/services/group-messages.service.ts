@@ -1,4 +1,9 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { IGroupMessageService } from '@/modules/group/interfaces/group-messages';
 import { InjectRepository } from '@nestjs/typeorm';
 import { GroupMessage } from '@/entities/group-message.entity';
@@ -26,48 +31,39 @@ export class GroupMessageService implements IGroupMessageService {
     private readonly groupService: IGroupService,
   ) {}
 
-  // async createGroupMessage({ groupId, ...params }: CreateGroupMessageParams) {
-  //   const { content, author, attachments } = params;
-  //   const group = await this.groupService.findGroupById(groupId);
-  //   if (!group) throw new BadRequestException('Group not found');
-  //   const findUser = group.users.find((u) => u.id === author.id);
-  //   if (!findUser)
-  //     throw new BadRequestException('User is not a member of this group');
-  //   const groupMessage = this.groupMessageRepository.create({
-  //     content,
-  //     group,
-  //     author,
-  //     attachments: attachments
-  //       ? await this.messageAttachmentsService.createGroupAttachments(
-  //           attachments,
-  //         )
-  //       : [],
-  //   });
-  //   const savedMessage = await this.groupMessageRepository.save(groupMessage);
-  //   group.lastMessageSent = savedMessage;
-  //   const updatedGroup = await this.groupService.saveGroup(group);
-  //   return { message: savedMessage, group: updatedGroup };
-  // }
-
   async createGroupMessage({
     groupId,
     content,
     author,
     attachments,
+    parentMessageId,
   }: CreateGroupMessageParams): Promise<any> {
+    let parentMessage: GroupMessage;
+    const messages = [];
+
     const group = await this.groupService.findGroupById(groupId);
     if (!group) throw new BadRequestException('Group not found');
     const findUser = group.users.find((u) => u.id === author.id);
     if (!findUser)
       throw new BadRequestException('User is not a member of this group');
 
-    const messages = [];
+    if (parentMessageId) {
+      parentMessage = await this.groupMessageRepository.findOne({
+        where: { id: parentMessageId },
+        relations: ['author', 'attachments', 'group'],
+      });
+      if (!parentMessage)
+        throw new ConflictException('Parent Message not found');
+      if (parentMessage.group.id !== groupId)
+        throw new ConflictException('Parent Message not in this Group');
+    }
 
     if (content) {
       const contentMessage = await this.createContentMessage(
         content,
         group,
         author,
+        parentMessage,
       );
       messages.push(contentMessage);
     }
@@ -77,6 +73,7 @@ export class GroupMessageService implements IGroupMessageService {
         attachments,
         group,
         author,
+        parentMessage,
       );
       messages.push(...attachmentMessages);
     }
@@ -91,12 +88,14 @@ export class GroupMessageService implements IGroupMessageService {
     content: string,
     group: Group,
     author: User,
+    parentMessage?: GroupMessage,
   ): Promise<GroupMessage> {
     const newMessage = this.groupMessageRepository.create({
       content,
       group,
       author,
       attachments: [],
+      parentMessage: parentMessage ? parentMessage : null,
     });
     return await this.groupMessageRepository.save(newMessage);
   }
@@ -105,6 +104,7 @@ export class GroupMessageService implements IGroupMessageService {
     attachments: AttachmentDto[],
     group: Group,
     author: User,
+    parentMessage?: GroupMessage,
   ): Promise<GroupMessage[]> {
     const messages = [];
     const imageAttachments = [];
@@ -130,6 +130,7 @@ export class GroupMessageService implements IGroupMessageService {
           group,
           author,
           attachments: [existingAttachment],
+          parentMessage: parentMessage ? parentMessage : null,
         });
         const savedMessage = await this.groupMessageRepository.save(newMessage);
         messages.push(savedMessage);
@@ -142,6 +143,7 @@ export class GroupMessageService implements IGroupMessageService {
         group,
         author,
         attachments: imageAttachments,
+        parentMessage: parentMessage ? parentMessage : null,
       });
       const savedMessage = await this.groupMessageRepository.save(newMessage);
       messages.push(savedMessage);
@@ -153,7 +155,13 @@ export class GroupMessageService implements IGroupMessageService {
   getGroupMessages(id: string): Promise<GroupMessage[]> {
     return this.groupMessageRepository.find({
       where: { group: { id } },
-      relations: ['author', 'attachments'],
+      relations: [
+        'author',
+        'attachments',
+        'parentMessage',
+        'parentMessage.attachments',
+        'parentMessage.author',
+      ],
       order: {
         createdAt: 'ASC',
       },
@@ -177,8 +185,15 @@ export class GroupMessageService implements IGroupMessageService {
         author: { id: params.userId },
         group: { id: params.groupId },
       },
+      relations: ['replies'],
     });
     if (!message) throw new BadRequestException('Cannot delete message');
+    if (message.replies && message.replies.length > 0) {
+      await this.groupMessageRepository.update(
+        { parentMessage: message },
+        { parentMessage: null },
+      );
+    }
     if (group.lastMessageSent.id !== message.id) {
       return this.groupMessageRepository.delete({ id: message.id });
     }

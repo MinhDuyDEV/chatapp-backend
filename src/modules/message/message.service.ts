@@ -35,8 +35,12 @@ export class MessageService implements IMessageService {
     content,
     conversationId,
     user,
+    parentMessageId,
     attachments,
   }: CreateMessageParams): Promise<any> {
+    let parentMessage: Message;
+    const messages = [];
+
     const existedConversation =
       await this.conversationService.findConversationById(conversationId);
     if (!existedConversation)
@@ -46,13 +50,23 @@ export class MessageService implements IMessageService {
     if (creator.id !== user.id && recipient.id !== user.id)
       throw new ForbiddenException('Cannot Create Message');
 
-    const messages = [];
+    if (parentMessageId) {
+      parentMessage = await this.messageRepository.findOne({
+        where: { id: parentMessageId },
+        relations: ['author', 'attachments', 'conversation'],
+      });
+      if (!parentMessage)
+        throw new ConflictException('Parent Message not found');
+      if (parentMessage.conversation.id !== conversationId)
+        throw new ConflictException('Parent Message not in this Conversation');
+    }
 
     if (content) {
       const contentMessage = await this.createContentMessage(
         content,
         existedConversation,
         user,
+        parentMessage,
       );
       messages.push(contentMessage);
     }
@@ -62,6 +76,7 @@ export class MessageService implements IMessageService {
         attachments,
         existedConversation,
         user,
+        parentMessage,
       );
       messages.push(...attachmentMessages);
     }
@@ -79,12 +94,14 @@ export class MessageService implements IMessageService {
     content: string,
     conversation: Conversation,
     user: User,
+    parentMessage?: Message,
   ): Promise<Message> {
     const newMessage = this.messageRepository.create({
       content,
       conversation,
       author: user,
       attachments: [],
+      parentMessage: parentMessage ? parentMessage : null,
     });
     return await this.messageRepository.save(newMessage);
   }
@@ -93,6 +110,7 @@ export class MessageService implements IMessageService {
     attachments: AttachmentDto[],
     conversation: Conversation,
     user: User,
+    parentMessage?: Message,
   ): Promise<Message[]> {
     const messages = [];
     const imageAttachments = [];
@@ -117,6 +135,7 @@ export class MessageService implements IMessageService {
           conversation,
           author: user,
           attachments: [existingAttachment],
+          parentMessage: parentMessage ? parentMessage : null,
         });
         const savedMessage = await this.messageRepository.save(newMessage);
         messages.push(savedMessage);
@@ -129,6 +148,7 @@ export class MessageService implements IMessageService {
         conversation,
         author: user,
         attachments: imageAttachments,
+        parentMessage: parentMessage ? parentMessage : null,
       });
       const savedMessage = await this.messageRepository.save(newMessage);
       messages.push(savedMessage);
@@ -166,7 +186,13 @@ export class MessageService implements IMessageService {
       throw new ForbiddenException('Cannot Get Messages');
 
     return await this.messageRepository.find({
-      relations: ['author', 'attachments'],
+      relations: [
+        'author',
+        'attachments',
+        'parentMessage',
+        'parentMessage.attachments',
+        'parentMessage.author',
+      ],
       where: { conversation: { id } },
       order: { createdAt: 'ASC' },
     });
@@ -174,7 +200,6 @@ export class MessageService implements IMessageService {
 
   async deleteMessage(param: DeleteMessageParam): Promise<any> {
     const { userId, conversationId, messageId } = param;
-    console.log('deleteMessage', param);
     const existedConversation =
       await this.conversationService.findConversationById(conversationId);
     if (!existedConversation)
@@ -186,8 +211,15 @@ export class MessageService implements IMessageService {
 
     const message = await this.messageRepository.findOne({
       where: { id: messageId, conversation: { id: conversationId } },
+      relations: ['replies'],
     });
     if (!message) throw new ConflictException('Message not found');
+    if (message.replies && message.replies.length > 0) {
+      await this.messageRepository.update(
+        { parentMessage: message },
+        { parentMessage: null },
+      );
+    }
     if (existedConversation.lastMessageSent.id !== message.id)
       return this.messageRepository.delete({ id: message.id });
 

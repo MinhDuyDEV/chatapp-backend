@@ -123,7 +123,6 @@ export class EventsGateway
     const usersInSocket = this.sessions.getSockets();
     const userIds = Array.from(usersInSocket.keys());
     Logger.log('message.create event', JSON.stringify(userIds));
-
     const { messages, conversation } = payload;
 
     const authorSocket = this.sessions.getUserSocket(messages[0].author.id);
@@ -220,6 +219,7 @@ export class EventsGateway
   @OnEvent('group.message.delete')
   async handleGroupMessageDelete(payload: CreateGroupMessageResponse) {
     Logger.log('group.message.create');
+    console.log('payload', payload);
     const { id } = payload.group;
     this.server.to(`group-${id}`).emit('onGroupMessageDelete', payload);
   }

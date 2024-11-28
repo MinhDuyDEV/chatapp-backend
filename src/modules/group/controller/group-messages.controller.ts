@@ -30,9 +30,15 @@ export class GroupMessageController {
   async createGroupMessage(
     @AuthUser() user: User,
     @Param('groupId') groupId: string,
-    @Body() { content, attachments }: CreateMessageDto,
+    @Body() { content, attachments, parentMessageId }: CreateMessageDto,
   ) {
-    const params = { groupId, author: user, content, attachments };
+    const params = {
+      groupId,
+      author: user,
+      content,
+      attachments,
+      parentMessageId,
+    };
     const response = await this.groupMessageService.createGroupMessage(params);
     this.eventEmitter.emit('group.message.create', response);
     return;
