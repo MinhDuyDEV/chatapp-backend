@@ -1,7 +1,7 @@
 import { SocialPlatform } from '@/shared/types/social-link';
 import { Expose, Type } from 'class-transformer';
+import { BasicProfileDto, UserBasicInfoDto } from './user-basic-info.dto';
 
-// Create a class for SocialLink instead of using type
 export class SocialLinkDto {
   @Expose()
   platform: SocialPlatform;
@@ -10,24 +10,12 @@ export class SocialLinkDto {
   url: string;
 }
 
-export class UserProfileResponseDto {
-  @Expose()
-  username: string;
-
-  @Expose()
-  avatar: string;
-
+export class ProfileDto extends BasicProfileDto {
   @Expose()
   coverPhoto: string;
 
   @Expose()
   bio: string;
-
-  @Expose()
-  firstName: string;
-
-  @Expose()
-  lastName: string;
 
   @Expose()
   birthday: string;
@@ -41,4 +29,10 @@ export class UserProfileResponseDto {
   @Expose()
   @Type(() => SocialLinkDto)
   socialLinks: SocialLinkDto[];
+}
+
+export class UserProfileResponseDto extends UserBasicInfoDto {
+  @Expose()
+  @Type(() => ProfileDto)
+  profile: ProfileDto;
 }

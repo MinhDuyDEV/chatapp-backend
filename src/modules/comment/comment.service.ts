@@ -6,7 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Between, LessThan, MoreThan, Repository } from 'typeorm';
 import { CommentResponseDto } from './dto/comment-response.dto';
 import { plainToInstance } from 'class-transformer';
-import { UserPostResponseDto } from '../user/dto/user-post-response.dto';
+import { UserBasicInfoDto } from '../user/dto/user-basic-info.dto';
 
 @Injectable()
 export class CommentService {
@@ -25,7 +25,7 @@ export class CommentService {
       {
         ...comment,
         postId: comment.post.id,
-        user: plainToInstance(UserPostResponseDto, comment.user, {
+        user: plainToInstance(UserBasicInfoDto, comment.user, {
           excludeExtraneousValues: true,
         }),
         parentCommentId: comment.parent ? comment.parent.id : null,

@@ -56,7 +56,7 @@ export class AuthController {
       .send(await this.authService.refreshToken(user, res));
   }
 
-  @Get('profile')
+  @Get('me')
   async me(@AuthUser() user: User) {
     return {
       id: user.id,

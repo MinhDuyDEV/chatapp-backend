@@ -1,5 +1,5 @@
 import { BaseEntity } from '@/entities/base.entity';
-import { UserPostResponseDto } from '@/modules/user/dto/user-post-response.dto';
+import { UserBasicInfoDto } from '@/modules/user/dto/user-basic-info.dto';
 import { Expose } from 'class-transformer';
 
 export class CommentResponseDto extends BaseEntity {
@@ -13,7 +13,7 @@ export class CommentResponseDto extends BaseEntity {
   content: string;
 
   @Expose()
-  user: UserPostResponseDto;
+  user: UserBasicInfoDto;
 
   @Expose()
   parentCommentId: string | null;

@@ -24,6 +24,7 @@ import { CommentModule } from './modules/comment/comment.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { CronjobsModule } from './modules/cronjobs/cronjobs.module';
 import { NotificationModule } from './modules/notification/notification.module';
+import { FriendModule } from './modules/friend/friend.module';
 
 @Module({
   imports: [
@@ -61,6 +62,7 @@ import { NotificationModule } from './modules/notification/notification.module';
     GroupModule,
     CommentModule,
     NotificationModule,
+    FriendModule,
   ],
   controllers: [],
   providers: [

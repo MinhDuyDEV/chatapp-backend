@@ -5,6 +5,15 @@ export class DtoHelper {
     return plainToInstance(dto, data, {
       excludeExtraneousValues: true,
       enableImplicitConversion: true,
+      exposeDefaultValues: true,
+    });
+  }
+
+  static mapToDtoArray<T>(dto: ClassConstructor<T>, data: any[]): T[] {
+    return plainToInstance(dto, data, {
+      excludeExtraneousValues: true,
+      enableImplicitConversion: true,
+      exposeDefaultValues: true,
     });
   }
 
@@ -16,7 +25,7 @@ export class DtoHelper {
     limit: number,
   ) {
     return {
-      data: this.mapToDto(dto, data),
+      data: this.mapToDtoArray(dto, data),
       total,
       page,
       limit,

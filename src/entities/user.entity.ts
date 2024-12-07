@@ -15,11 +15,10 @@ import { Share } from './share.entity';
 import { BaseEntity } from './base.entity';
 import { Group } from '@/entities/group.entity';
 import { Profile } from '@/entities/profile.entity';
-import { Peer } from '@/entities/peer.entity';
-import { UserPresence } from '@/entities/user-presence.entity';
 import { AvatarAttachment } from './avatar-attachment.entity';
 import { Follow } from '@/entities/follow.entity';
 import { Notification } from '@/entities/notification.entity';
+import { FriendRequest } from './friend-request.entity';
 
 @Entity('users')
 export class User extends BaseEntity {
@@ -63,19 +62,17 @@ export class User extends BaseEntity {
   @JoinColumn()
   profile: Profile;
 
-  @OneToOne(() => UserPresence, { cascade: ['insert', 'update'] })
-  presence: UserPresence;
-
-  @OneToOne(() => Peer, (peer) => peer.user, {
-    cascade: ['insert', 'remove', 'update'],
-  })
-  peer: Peer;
-
   @OneToMany(() => Follow, (follow) => follow.follower)
   followers: Follow[];
 
   @OneToMany(() => Follow, (follow) => follow.following)
   following: Follow[];
+
+  @OneToMany(() => FriendRequest, (request) => request.sender)
+  sentFriendRequests: FriendRequest[];
+
+  @OneToMany(() => FriendRequest, (request) => request.receiver)
+  receivedFriendRequests: FriendRequest[];
 
   @OneToMany(() => Notification, (notification) => notification.user)
   notifications: Notification[];

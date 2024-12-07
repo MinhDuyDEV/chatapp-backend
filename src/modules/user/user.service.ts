@@ -104,22 +104,32 @@ export class UserService {
     };
   }
 
-  async getUserProfile(userId: string): Promise<UserProfileResponseDto> {
+  async getUserProfile(username: string): Promise<UserProfileResponseDto> {
     const user = await this.userRepository.findOne({
-      where: { id: userId },
+      where: { username },
       relations: ['profile'],
+      relationLoadStrategy: 'join',
+      select: {
+        id: true,
+        username: true,
+        avatar: true,
+        profile: {
+          firstName: true,
+          lastName: true,
+          coverPhoto: true,
+          bio: true,
+          birthday: true,
+          gender: true,
+          address: true,
+          socialLinks: true,
+        },
+      },
     });
 
     if (!user) {
-      throw new BadRequestException('User or profile not found');
+      throw new BadRequestException('User not found');
     }
 
-    const responseData = {
-      username: user.username,
-      avatar: user.avatar,
-      ...user.profile,
-    };
-
-    return DtoHelper.mapToDto(UserProfileResponseDto, responseData);
+    return DtoHelper.mapToDto(UserProfileResponseDto, user);
   }
 }

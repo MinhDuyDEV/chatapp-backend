@@ -1,6 +1,6 @@
 import { BaseFileResponseDto } from '@/modules/file/dto/base-file-response.dto';
 import { LikePostResponseDto } from '@/modules/like/dto/like-post-response.dto';
-import { UserPostResponseDto } from '@/modules/user/dto/user-post-response.dto';
+import { UserBasicInfoDto } from '@/modules/user/dto/user-basic-info.dto';
 import { Expose, Type } from 'class-transformer';
 
 export class PostResponseDto {
@@ -20,8 +20,8 @@ export class PostResponseDto {
   updatedAt: Date;
 
   @Expose()
-  @Type(() => UserPostResponseDto)
-  author: UserPostResponseDto;
+  @Type(() => UserBasicInfoDto)
+  author: UserBasicInfoDto;
 
   @Expose()
   @Type(() => BaseFileResponseDto)

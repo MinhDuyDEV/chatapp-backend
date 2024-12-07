@@ -4,13 +4,12 @@ import {
   Controller,
   Get,
   Inject,
+  Param,
   Post,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
-
 import { ROUTES } from '@/shared/constants/routes.enum';
-
 import { User } from '@/entities/user.entity';
 import { Services } from '@/shared/constants/services.enum';
 import { IUserService } from '@/modules/user/users';
@@ -58,10 +57,10 @@ export class UserController {
     return await this.userService.uploadCoverPhoto(user.id, file);
   }
 
-  @Get('profile')
+  @Get('profile/:username')
   async getUserProfile(
-    @AuthUser() user: User,
+    @Param('username') username: string,
   ): Promise<UserProfileResponseDto> {
-    return await this.userService.getUserProfile(user.id);
+    return await this.userService.getUserProfile(username);
   }
 }

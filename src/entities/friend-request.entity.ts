@@ -1,31 +1,31 @@
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  JoinColumn,
-  OneToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { User } from '@/entities/user.entity';
+import { BaseEntity } from './base.entity';
+import { FriendRequestStatus } from '@/modules/friend/types/user-relationship.type';
 
-@Entity({ name: 'friend_request' })
-export class FriendRequest {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
-  @OneToOne(() => User, { createForeignKeyConstraints: false })
+@Entity({ name: 'friend_requests' })
+export class FriendRequest extends BaseEntity {
+  @ManyToOne(() => User, (user) => user.sentFriendRequests)
   @JoinColumn()
   sender: User;
 
-  @OneToOne(() => User, { createForeignKeyConstraints: false })
+  @ManyToOne(() => User, (user) => user.receivedFriendRequests)
   @JoinColumn()
   receiver: User;
 
-  @CreateDateColumn()
-  createdAt: number;
-
-  @Column()
+  @Column({
+    type: 'enum',
+    enum: ['pending', 'accepted', 'rejected', 'none'],
+    default: 'none',
+  })
   status: FriendRequestStatus;
-}
 
-export type FriendRequestStatus = 'accepted' | 'pending' | 'rejected';
+  @Column({ nullable: true })
+  message?: string;
+
+  @Column({ nullable: true })
+  reason?: string;
+
+  @Column({ nullable: true })
+  respondedAt?: Date;
+}

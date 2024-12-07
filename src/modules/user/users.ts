@@ -21,5 +21,5 @@ export interface IUserService {
     userId: string,
     file: Express.Multer.File,
   ): Promise<UserCoverPhotoResponseDto>;
-  getUserProfile(userId: string): Promise<UserProfileResponseDto>;
+  getUserProfile(username: string): Promise<UserProfileResponseDto>;
 }
