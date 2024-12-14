@@ -20,17 +20,18 @@ export class LikeController {
   constructor(private readonly likeService: LikeService) {}
 
   @Post('toggle-like/:postId')
-  @HttpCode(HttpStatus.OK)
+  @HttpCode(HttpStatus.NO_CONTENT)
   async toggleLike(@AuthUser() user: User, @Param('postId') postId: string) {
     return await this.likeService.toggleLike(user.id, postId);
   }
 
   @Get('post/:postId')
   async getLikesByPost(
+    @AuthUser() user: User,
     @Param('postId') postId: string,
     @Query('page', ParseIntPipe) page = 1,
     @Query('limit', ParseIntPipe) limit = 10,
   ) {
-    return this.likeService.getLikesByPost(postId, page, limit);
+    return this.likeService.getLikesByPost(user.id, postId, page, limit);
   }
 }

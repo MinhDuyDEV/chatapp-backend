@@ -32,7 +32,9 @@ export class Notification {
   })
   type: NotificationType;
 
-  @ManyToOne(() => User, (user) => user.notifications)
+  @ManyToOne(() => User, (user) => user.notifications, {
+    onDelete: 'CASCADE',
+  })
   user: User;
 
   @CreateDateColumn()
