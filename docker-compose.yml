@@ -10,8 +10,11 @@ services:
       - MYSQL_USER=chatapp_user
       - MYSQL_PASSWORD=chatapp_password_123
       - MYSQL_TCP_PORT=3306
+      - TZ=Asia/Ho_Chi_Minh
     volumes:
       - chatapp_db_data:/var/lib/mysql
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
 
   redis:
     image: redis:alpine

@@ -63,6 +63,8 @@ export class AuthController {
       email: user.email,
       username: user.username,
       avatar: user.avatar,
+      firstName: user.profile?.firstName,
+      lastName: user.profile?.lastName,
     };
   }
 

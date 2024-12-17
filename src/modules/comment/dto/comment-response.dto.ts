@@ -1,6 +1,6 @@
 import { BaseEntity } from '@/entities/base.entity';
 import { UserBasicInfoDto } from '@/modules/user/dto/user-basic-info.dto';
-import { Expose } from 'class-transformer';
+import { Expose, Type } from 'class-transformer';
 
 export class CommentResponseDto extends BaseEntity {
   @Expose()
@@ -13,6 +13,7 @@ export class CommentResponseDto extends BaseEntity {
   content: string;
 
   @Expose()
+  @Type(() => UserBasicInfoDto)
   user: UserBasicInfoDto;
 
   @Expose()

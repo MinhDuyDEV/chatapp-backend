@@ -51,6 +51,7 @@ export class PostService {
       ...createPostDto,
       author: { id: authorId },
     });
+
     const savedPost = await this.postRepository.save(post);
 
     if (createPostDto.attachmentIds?.length > 0) {

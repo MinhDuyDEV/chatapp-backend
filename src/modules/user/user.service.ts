@@ -32,6 +32,7 @@ export class UserService {
         { email: params.email },
         { username: params.username },
       ],
+      relations: ['profile'],
     });
   }
 

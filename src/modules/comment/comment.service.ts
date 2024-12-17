@@ -5,8 +5,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, LessThan, MoreThan, Repository } from 'typeorm';
 import { CommentResponseDto } from './dto/comment-response.dto';
-import { plainToInstance } from 'class-transformer';
 import { UserBasicInfoDto } from '../user/dto/user-basic-info.dto';
+import { DtoHelper } from '@/shared/utils/dto-helper';
 
 @Injectable()
 export class CommentService {
@@ -20,20 +20,15 @@ export class CommentService {
   ) {}
 
   private mapCommentToResponseDto(comment: Comment): CommentResponseDto {
-    return plainToInstance(
-      CommentResponseDto,
-      {
-        ...comment,
-        postId: comment.post.id,
-        user: plainToInstance(UserBasicInfoDto, comment.user, {
-          excludeExtraneousValues: true,
-        }),
-        parentCommentId: comment.parent ? comment.parent.id : null,
-      },
-      {
-        excludeExtraneousValues: true,
-      },
-    );
+    return DtoHelper.mapToDto(CommentResponseDto, {
+      ...comment,
+      postId: comment.post.id,
+      user: DtoHelper.mapToDto(UserBasicInfoDto, {
+        ...comment.user,
+        profile: comment.user.profile,
+      }),
+      parentCommentId: comment.parent ? comment.parent.id : null,
+    });
   }
 
   async createComment({
@@ -115,7 +110,8 @@ export class CommentService {
     page?: number;
     limit?: number;
   }) {
-    await this.postRepository.findOneByOrFail({ id: postId });
+    const post = await this.postRepository.findOneBy({ id: postId });
+    if (!post) throw new NotFoundException('Post not found');
 
     if (parentCommentId) {
       const parent = await this.commentRepository.findOneBy({
@@ -129,7 +125,7 @@ export class CommentService {
           left: MoreThan(parent.left),
           right: LessThan(parent.right),
         },
-        relations: ['user', 'post', 'parent'],
+        relations: ['user', 'user.profile', 'post', 'parent'],
         order: { left: 'ASC' },
         skip: (page - 1) * limit,
         take: limit,
@@ -146,7 +142,7 @@ export class CommentService {
 
     const [comments, total] = await this.commentRepository.findAndCount({
       where: { post: { id: postId } },
-      relations: ['user', 'post', 'parent'],
+      relations: ['user', 'user.profile', 'post', 'parent'],
       order: { left: 'ASC' },
       skip: (page - 1) * limit,
       take: limit,

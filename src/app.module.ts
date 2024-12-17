@@ -46,6 +46,7 @@ import { TimelineModule } from './modules/timeline/timeline.module';
         database: configService.get<string>('config.database.database'),
         entities,
         synchronize: true,
+        timezone: 'local',
       }),
     }),
     EventEmitterModule.forRoot(),
